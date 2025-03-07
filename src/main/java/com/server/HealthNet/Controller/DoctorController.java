@@ -128,6 +128,8 @@ public class DoctorController {
     @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('PATIENT')")
     public ResponseEntity<List<String>> getAvailableAppointmentTimes(@PathVariable Long id,
             @RequestParam("date") String date) {
+        System.out.println(
+                "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuthentication = userAuthenticationService.getUserByUsername(username);
         if (userAuthentication == null) {
