@@ -204,7 +204,7 @@ public class DoctorRepository {
         if (currentStart.isBefore(dayEnd)) {
             availableTimes.add(currentStart + " - " + dayEnd);
         }
-
+        System.out.println("Available times: " + availableTimes);
         return availableTimes;
     }
 }
