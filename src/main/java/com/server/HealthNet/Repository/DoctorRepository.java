@@ -141,8 +141,8 @@ public class DoctorRepository {
         String appointmentsSql = "SELECT start_time, end_time FROM appointments WHERE doctor_id = ? AND date = ?";
         List<Appointment> appointments = jdbcTemplate.query(appointmentsSql, (rs, rowNum) -> {
             Appointment appointment = new Appointment();
-            appointment.setStartTime(rs.getObject("start_time", LocalTime.class));
-            appointment.setEndTime(rs.getObject("end_time", LocalTime.class));
+            appointment.setStartTime(rs.getObject("startTime", LocalTime.class));
+            appointment.setEndTime(rs.getObject("endTime", LocalTime.class));
             return appointment;
         }, doctorId, date);
 
