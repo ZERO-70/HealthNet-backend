@@ -138,7 +138,7 @@ public class DoctorRepository {
 
         Avalibility availability = availabilityOpt.get();
 
-        String appointmentsSql = "SELECT start_time, end_time FROM appointments WHERE doctor_id = ? AND date = ?";
+        String appointmentsSql = "SELECT startTime, endTime FROM appointments WHERE doctor_id = ? AND date = ?";
         List<Appointment> appointments = jdbcTemplate.query(appointmentsSql, (rs, rowNum) -> {
             Appointment appointment = new Appointment();
             appointment.setStartTime(rs.getObject("startTime", LocalTime.class));
