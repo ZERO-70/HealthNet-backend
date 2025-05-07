@@ -56,8 +56,11 @@ public class UserAuthenticationService {
     }
 
     public String verify(UserAuthentication userAuthentication) {
+        System.out.println(
+                "Inside verify .... " + userAuthentication.getUsername() + " " + userAuthentication.getPassword());
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 userAuthentication.getUsername(), userAuthentication.getPassword()));
+        System.out.println("checking fuck .... " + authentication.isAuthenticated());
         return authentication.isAuthenticated()
                 ? jwTservice.generateToken(userAuthentication.getUsername(), userAuthentication.getRole().toString())
                 : "Not Authenticated";
