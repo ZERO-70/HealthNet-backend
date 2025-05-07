@@ -1,0 +1,98 @@
+# HealthNet API Endpoints
+
+## Doctor Controller Endpoints
+- POST /doctor - Add a new doctor
+- GET /doctor/{id} - Get doctor by ID
+- GET /doctor/getmine - Get the currently logged-in doctor
+- GET /doctor - Get all doctors
+- PUT /doctor - Update doctor information
+- DELETE /doctor/{id} - Delete a doctor
+- GET /doctor/{id}/available_time?date=YYYY-MM-DD - Get available appointment times for a doctor on a specific date
+
+## Patient Controller Endpoints
+- GET /patient/{id} - Get patient by ID
+- GET /patient/getmine - Get the currently logged-in patient
+- GET /patient - Get all patients
+- POST /patient - Add a new patient
+- PUT /patient - Update patient information
+- DELETE /patient/{id} - Delete a patient
+
+## Appointment Controller
+- GET /appointment/{id} - Get appointment by ID
+- GET /appointment - Get all appointments
+- GET /appointment/patient/{patientId} - Get appointments for a specific patient
+- GET /appointment/doctor/{doctorId} - Get appointments for a specific doctor
+- POST /appointment - Create a new appointment
+- PUT /appointment/{id} - Update an appointment
+- DELETE /appointment/{id} - Delete an appointment
+
+## Medical Record Controller
+- GET /medicalRecord/{id} - Get medical record by ID
+- GET /medicalRecord/patient/{patientId} - Get medical records for a specific patient
+- POST /medicalRecord - Create a new medical record
+- PUT /medicalRecord/{id} - Update a medical record
+- DELETE /medicalRecord/{id} - Delete a medical record
+
+## Department Controller
+- GET /department/{id} - Get department by ID
+- GET /department - Get all departments
+- POST /department - Create a new department
+- PUT /department/{id} - Update a department
+- DELETE /department/{id} - Delete a department
+
+## Availability Controller
+- GET /availability/{id} - Get availability by ID
+- GET /availability/doctor/{doctorId} - Get availability for a specific doctor
+- POST /availability - Create a new availability
+- PUT /availability/{id} - Update an availability
+- DELETE /availability/{id} - Delete an availability
+
+## Staff Controller
+- GET /staff/{id} - Get staff by ID
+- GET /staff - Get all staff
+- GET /staff/getmine - Get the currently logged-in staff
+- POST /staff - Add a new staff
+- PUT /staff - Update staff information
+- DELETE /staff/{id} - Delete a staff
+
+## Chat Controller
+- GET /chat/{id} - Get chat by ID
+- GET /chat/user/{userId} - Get chats for a specific user
+- POST /chat - Send a new chat message
+- DELETE /chat/{id} - Delete a chat
+
+## Inventory Controller
+- GET /inventory/{id} - Get inventory item by ID
+- GET /inventory - Get all inventory items
+- POST /inventory - Add a new inventory item
+- PUT /inventory/{id} - Update an inventory item
+- DELETE /inventory/{id} - Delete an inventory item
+
+## Suggestion Controller
+- GET /suggestion/{id} - Get suggestion by ID
+- GET /suggestion - Get all suggestions
+- POST /suggestion - Create a new suggestion
+- PUT /suggestion/{id} - Update a suggestion
+- DELETE /suggestion/{id} - Delete a suggestion
+
+## Treatment Controller
+- GET /treatment/{id} - Get treatment by ID
+- GET /treatment/patient/{patientId} - Get treatments for a specific patient
+- POST /treatment - Create a new treatment
+- PUT /treatment/{id} - Update a treatment
+- DELETE /treatment/{id} - Delete a treatment
+
+## User Authentication Controller
+- POST /auth/register - Register a new user
+- POST /auth/login - Login a user
+- GET /auth/validate - Validate a user's token
+- POST /auth/logout - Logout a user
+
+## Person Controller
+- GET /person/{id} - Get person by ID
+- GET /person - Get all persons
+- POST /person - Create a new person
+- PUT /person/{id} - Update a person
+- DELETE /person/{id} - Delete a person
+
+Note: These are relative URLs that need to be prefixed with your API base URL (e.g., `https://your-domain.com/api/`)

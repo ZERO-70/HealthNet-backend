@@ -1,0 +1,75 @@
+{
+  "models": {
+    "doctor": {
+      "person_id": 123,
+      "image": "[base64-encoded image data]",
+      "image_type": "image/jpeg",
+      "name": "Dr. John Smith",
+      "gender": "Male",
+      "age": 45,
+      "birthdate": "1980-05-15",
+      "contact_info": "+1-555-123-4567",
+      "address": "123 Medical Center Ave, City, State 12345",
+      "specialization": "Cardiology"
+    },
+    "staff": {
+      "person_id": 456,
+      "image": "[base64-encoded image data]",
+      "image_type": "image/jpeg",
+      "name": "Jane Doe",
+      "gender": "Female",
+      "age": 30,
+      "birthdate": "1995-08-22",
+      "contact_info": "+1-555-987-6543",
+      "address": "456 Hospital St, City, State 12345",
+      "proffession": "Nurse"
+    },
+    "patient": {
+      "person_id": 789,
+      "image": "[base64-encoded image data]",
+      "image_type": "image/jpeg",
+      "name": "Michael Johnson",
+      "gender": "Male",
+      "age": 35,
+      "birthdate": "1990-11-10",
+      "contact_info": "+1-555-456-7890",
+      "address": "789 Residential Rd, City, State 12345",
+      "weight": "75kg",
+      "height": "180cm"
+    }
+  },
+  "suggestions": [
+    {
+      "id": 1,
+      "title": "Extended Operating Hours",
+      "description": "Extend clinic hours to accommodate working patients by offering evening appointments until 8pm on weekdays.",
+      "date_submitted": "2025-04-20",
+      "status": "PENDING",
+      "submitted_by": "patient_id_234"
+    },
+    {
+      "id": 2,
+      "title": "Online Prescription Renewal",
+      "description": "Implement a feature in the patient portal that allows patients to request prescription renewals online without calling.",
+      "date_submitted": "2025-04-15",
+      "status": "APPROVED",
+      "submitted_by": "patient_id_456"
+    },
+    {
+      "id": 3,
+      "title": "Multilingual Support",
+      "description": "Add multilingual support for common languages in our community to improve accessibility for non-English speaking patients.",
+      "date_submitted": "2025-04-22",
+      "status": "UNDER_REVIEW",
+      "submitted_by": "staff_id_123"
+    },
+    {
+      "id": 4,
+      "title": "Virtual Waiting Room",
+      "description": "Implement a virtual waiting room so patients can wait in their cars and receive text notifications when the doctor is ready to see them.",
+      "date_submitted": "2025-05-01",
+      "status": "PENDING",
+      "submitted_by": "doctor_id_789"
+    }
+  ]
+}
