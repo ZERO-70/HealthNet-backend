@@ -163,7 +163,7 @@ public class MedicalRecordController {
         }
     }
 
-    @GetMapping("/patient/records")
+    @GetMapping("/getmine")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<?> getMyMedicalRecords() {
         UserAuthentication user = getCurrentUser();
