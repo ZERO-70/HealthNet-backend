@@ -12,7 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/suggestion")
@@ -104,5 +107,38 @@ public class SuggestionController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
         return suggestionService.getSuggestionsByPersonId(user.getPersonId());
+    }
+
+    // Get the date of the last suggestion update
+    @GetMapping("/lastupdated")
+    public ResponseEntity<Map<String, Object>> getLastUpdateDate() {
+        LocalDate lastUpdateDate = suggestionService.getLastSuggestionUpdateDate();
+        Map<String, Object> response = new HashMap<>();
+
+        if (lastUpdateDate != null) {
+            response.put("lastUpdated", lastUpdateDate);
+            response.put("isUpdatedToday", lastUpdateDate.equals(LocalDate.now()));
+        } else {
+            response.put("lastUpdated", null);
+            response.put("isUpdatedToday", false);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // Get only the last suggestion update date for authenticated users
+    @GetMapping("/lastUpdateDate")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<LocalDate> getLastSuggestionUpdateDate() {
+        LocalDate lastUpdateDate = suggestionService.getLastSuggestionUpdateDate();
+        return new ResponseEntity<>(lastUpdateDate, HttpStatus.OK);
+    }
+
+    // Force update suggestions (admin only)
+    @PostMapping("/forceupdate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> forceUpdateSuggestions() {
+        suggestionService.fetchDailySuggestions();
+        return new ResponseEntity<>("Suggestions updated successfully", HttpStatus.OK);
     }
 }

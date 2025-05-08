@@ -2,16 +2,35 @@ package com.server.HealthNet.Service;
 
 import com.server.HealthNet.Model.Suggestion;
 import com.server.HealthNet.Repository.SuggestionRepository;
+import com.server.HealthNet.Repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SuggestionService {
 
     @Autowired
     private SuggestionRepository suggestionRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    // Global variable to track the date of last suggestion update
+    private static LocalDate lastSuggestionUpdateDate = null;
 
     public List<Suggestion> getAllSuggestions() {
         return suggestionRepository.findAll();
@@ -35,5 +54,62 @@ public class SuggestionService {
 
     public int deleteSuggestion(Long id) {
         return suggestionRepository.deleteById(id);
+    }
+
+    /**
+     * Returns the date when suggestions were last updated
+     */
+    public LocalDate getLastSuggestionUpdateDate() {
+        return lastSuggestionUpdateDate;
+    }
+
+    /**
+     * Fetches medical advice for a patient from external API and saves it as a
+     * suggestion
+     */
+    public void fetchAndSaveMedicalAdvice(Long patientId) {
+        String apiUrl = "http://159.89.49.64:7898/api/medical-advice";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("patient_id", patientId.toString());
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
+            Map<String, String> response = restTemplate.postForObject(apiUrl, request, Map.class);
+
+            if (response != null && response.containsKey("advice")) {
+                String adviceText = response.get("advice");
+
+                Suggestion suggestion = new Suggestion();
+                suggestion.setPersonId(patientId);
+                suggestion.setSuggestionText(adviceText);
+                suggestion.setCreatedAt(LocalDateTime.now());
+
+                createSuggestion(suggestion);
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching medical advice for patient " + patientId + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Scheduled task to run daily at midnight to fetch suggestions for all patients
+     */
+    @Scheduled(cron = "0 35 14 * * ?") // Run at midnight every day
+    public void fetchDailySuggestions() {
+        // Get all patient IDs from the database
+        List<Long> patientIds = patientRepository.getAllPatientIds();
+
+        // Process each patient ID
+        for (Long patientId : patientIds) {
+            fetchAndSaveMedicalAdvice(patientId);
+        }
+
+        // Update the last suggestion update date
+        lastSuggestionUpdateDate = LocalDate.now();
     }
 }
