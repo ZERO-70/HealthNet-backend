@@ -56,6 +56,16 @@ public class PatientRepository {
         return jdbcTemplate.query(sql, patientRowMapper);
     }
 
+    /**
+     * Retrieves all patient IDs from the database
+     * 
+     * @return List of patient IDs
+     */
+    public List<Long> getAllPatientIds() {
+        String sql = "SELECT patient_id FROM patient";
+        return jdbcTemplate.queryForList(sql, Long.class);
+    }
+
     public int deletePatientById(Long patientId) {
         String deletePatientSql = "DELETE FROM patient WHERE patient_id = ?";
         int rowsAffected = jdbcTemplate.update(deletePatientSql, patientId);
