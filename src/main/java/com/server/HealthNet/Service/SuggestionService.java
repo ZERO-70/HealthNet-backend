@@ -30,7 +30,7 @@ public class SuggestionService {
     private RestTemplate restTemplate;
 
     // Global variable to track the date of last suggestion update
-    private static LocalDate lastSuggestionUpdateDate = null;
+    private static LocalDate lastSuggestionUpdateDate = LocalDate.now();
 
     public List<Suggestion> getAllSuggestions() {
         return suggestionRepository.findAll();
