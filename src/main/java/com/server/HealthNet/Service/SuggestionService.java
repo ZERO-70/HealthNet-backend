@@ -99,8 +99,12 @@ public class SuggestionService {
     /**
      * Scheduled task to run daily at midnight to fetch suggestions for all patients
      */
-    @Scheduled(cron = "0 35 14 * * ?") // Run at midnight every day
+    @Scheduled(cron = "0 47 22 * * ?") // Run at midnight every day
     public void fetchDailySuggestions() {
+        // First, delete all existing suggestions from the table
+        int deletedCount = suggestionRepository.deleteAll();
+        System.out.println("Deleted " + deletedCount + " existing suggestions");
+
         // Get all patient IDs from the database
         List<Long> patientIds = patientRepository.getAllPatientIds();
 

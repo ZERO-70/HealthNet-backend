@@ -59,4 +59,14 @@ public class SuggestionRepository {
         String sql = "DELETE FROM suggestion WHERE suggestion_id = ?";
         return jdbcTemplate.update(sql, id);
     }
+
+    /**
+     * Delete all suggestions from the suggestion table
+     * 
+     * @return the number of rows affected
+     */
+    public int deleteAll() {
+        String sql = "DELETE FROM suggestion";
+        return jdbcTemplate.update(sql);
+    }
 }
