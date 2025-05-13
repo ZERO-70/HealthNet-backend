@@ -18,7 +18,7 @@ public class AvalibilityRepository {
     private JdbcTemplate jdbcTemplate;
 
     public int save(Avalibility avalibility) {
-        String sql = "INSERT INTO avalibility (doctor_id, Mon_startTime, Mon_endTime, Tue_startTime, Tue_endTime, Wed_startTime, " +
+        String sql = "INSERT INTO availability (doctor_id, Mon_startTime, Mon_endTime, Tue_startTime, Tue_endTime, Wed_startTime, " +
                      "Wed_endTime, Thu_startTime, Thu_endTime, Fri_startTime, Fri_endTime, Sat_startTime, Sat_endTime, " +
                      "Sun_startTime, Sun_endTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(sql, avalibility.getDoctor_id(), avalibility.getMon_startTime(), avalibility.getMon_endTime(), 
@@ -31,22 +31,22 @@ public class AvalibilityRepository {
     }
 
     public List<Avalibility> findAll() {
-        String sql = "SELECT * FROM avalibility";
+        String sql = "SELECT * FROM availability";
         return jdbcTemplate.query(sql, new AvalibilityRowMapper());
     }
 
     public Optional<Avalibility> findById(Long id) {
-        String sql = "SELECT * FROM avalibility WHERE doctor_id = ?";
+        String sql = "SELECT * FROM availability WHERE doctor_id = ?";
         return jdbcTemplate.query(sql, new AvalibilityRowMapper(), id).stream().findFirst();
     }
 
     public int deleteById(Long id) {
-        String sql = "DELETE FROM avalibility WHERE doctor_id = ?";
+        String sql = "DELETE FROM availability WHERE doctor_id = ?";
         return jdbcTemplate.update(sql, id);
     }
 
     public int update(Long id, Avalibility avalibility) {
-        String sql = "UPDATE avalibility SET Mon_startTime = ?, Mon_endTime = ?, Tue_startTime = ?, Tue_endTime = ?, " +
+        String sql = "UPDATE availability SET Mon_startTime = ?, Mon_endTime = ?, Tue_startTime = ?, Tue_endTime = ?, " +
                      "Wed_startTime = ?, Wed_endTime = ?, Thu_startTime = ?, Thu_endTime = ?, Fri_startTime = ?, " +
                      "Fri_endTime = ?, Sat_startTime = ?, Sat_endTime = ?, Sun_startTime = ?, Sun_endTime = ? " +
                      "WHERE doctor_id = ?";

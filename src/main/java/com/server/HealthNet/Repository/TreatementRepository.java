@@ -16,7 +16,7 @@ public class TreatementRepository {
 
     private Treatement mapRowToTreatment(ResultSet rs, int rowNum) throws SQLException {
         Treatement treatment = new Treatement();
-        treatment.setTreatement_id(rs.getLong("treatement_id"));
+        treatment.setTreatement_id(rs.getLong("treatment_id"));
         treatment.setName(rs.getString("name"));
         treatment.setDoctor_id(rs.getLong("doctor_id"));
         treatment.setDepartment_id(rs.getLong("department_id"));
@@ -24,27 +24,27 @@ public class TreatementRepository {
     }
 
     public List<Treatement> findAll() {
-        String sql = "SELECT * FROM treatement";
+        String sql = "SELECT * FROM treatment";
         return jdbcTemplate.query(sql, this::mapRowToTreatment);
     }
 
     public Treatement findById(Long id) {
-        String sql = "SELECT * FROM treatement WHERE treatement_id = ?";
+        String sql = "SELECT * FROM treatment WHERE treatment_id = ?";
         return jdbcTemplate.queryForObject(sql, this::mapRowToTreatment, id);
     }
 
     public int save(Treatement treatment) {
-        String sql = "INSERT INTO treatement (name, doctor_id, department_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO treatment (name, doctor_id, department_id) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, treatment.getName(), treatment.getDoctor_id(), treatment.getDepartment_id());
     }
 
     public int update(Treatement treatment) {
-        String sql = "UPDATE treatement SET name = ?, doctor_id = ?, department_id = ? WHERE treatement_id = ?";
+        String sql = "UPDATE treatment SET name = ?, doctor_id = ?, department_id = ? WHERE treatment_id = ?";
         return jdbcTemplate.update(sql, treatment.getName(), treatment.getDoctor_id(), treatment.getDepartment_id(), treatment.getTreatement_id());
     }
 
     public int deleteById(Long id) {
-        String sql = "DELETE FROM treatement WHERE treatement_id = ?";
+        String sql = "DELETE FROM treatment WHERE treatment_id = ?";
         return jdbcTemplate.update(sql, id);
     }
 }
