@@ -31,6 +31,7 @@ public class InventoryController {
 
     @PostMapping
     public ResponseEntity<String> createInventoryItem(@RequestBody Inventory inventory) {
+        System.out.println("accessed the createInventoryItem method");
         return inventoryService.createInventoryItem(inventory) > 0
                 ? new ResponseEntity<>("Inventory item created successfully", HttpStatus.OK)
                 : new ResponseEntity<>("Inventory item creation failed", HttpStatus.NOT_FOUND);
