@@ -78,16 +78,27 @@ public class MedicalRecordService {
 
     @Transactional
     public int deleteMedicalRecord(Long id, Long userId) {
-        // First audit the deletion
-        MedicalRecordAudit audit = new MedicalRecordAudit(id, userId, "DELETE", "Deleted medical record");
-        auditRepository.save(audit);
+        try {
+            // Delete related attachments and lab results
+            attachmentRepository.deleteByRecordId(id);
+            labResultRepository.deleteByRecordId(id);
 
-        // Delete related attachments and lab results
-        attachmentRepository.deleteByRecordId(id);
-        labResultRepository.deleteByRecordId(id);
+            // Delete audit trail entries first to resolve foreign key constraint
+            auditRepository.deleteByRecordId(id);
 
-        // Delete the record
-        return medicalRecordRepository.deleteById(id);
+            // Finally delete the medical record
+            return medicalRecordRepository.deleteById(id);
+        } catch (Exception e) {
+            // Log deletion attempt even if it failed
+            try {
+                MedicalRecordAudit audit = new MedicalRecordAudit(id, userId, "DELETE_ATTEMPT",
+                        "Attempted to delete medical record: " + e.getMessage());
+                auditRepository.save(audit);
+            } catch (Exception ex) {
+                // Ignore if we can't even save the audit
+            }
+            throw e; // Re-throw the exception to be handled by the controller
+        }
     }
 
     public List<MedicalRecord> getPatientMedicalRecords(Long patientId) {

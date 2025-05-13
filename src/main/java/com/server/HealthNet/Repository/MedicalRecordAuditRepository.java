@@ -63,4 +63,9 @@ public class MedicalRecordAuditRepository {
 
         return keyHolder.getKey().longValue();
     }
+
+    public int deleteByRecordId(Long recordId) {
+        String sql = "DELETE FROM medical_record_audit WHERE record_id = ?";
+        return jdbcTemplate.update(sql, recordId);
+    }
 }

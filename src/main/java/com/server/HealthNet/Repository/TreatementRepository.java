@@ -40,7 +40,8 @@ public class TreatementRepository {
 
     public int update(Treatement treatment) {
         String sql = "UPDATE treatment SET name = ?, doctor_id = ?, department_id = ? WHERE treatment_id = ?";
-        return jdbcTemplate.update(sql, treatment.getName(), treatment.getDoctor_id(), treatment.getDepartment_id(), treatment.getTreatement_id());
+        return jdbcTemplate.update(sql, treatment.getName(), treatment.getDoctor_id(), treatment.getDepartment_id(),
+                treatment.getTreatement_id());
     }
 
     public int deleteById(Long id) {
