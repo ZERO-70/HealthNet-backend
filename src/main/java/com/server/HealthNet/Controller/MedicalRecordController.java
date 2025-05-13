@@ -302,15 +302,19 @@ public class MedicalRecordController {
     public ResponseEntity<Map<String, Object>> deleteLabResult(@PathVariable Long resultId) {
         Map<String, Object> response = new HashMap<>();
         UserAuthentication user = getCurrentUser();
+        System.out.println("got the user");
 
         if (user == null) {
+            System.out.println("User is null");
             response.put("success", false);
             response.put("message", "Authentication error");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         try {
+            System.out.println("Deleting lab result with ID: " + resultId);
             int result = medicalRecordService.deleteLabResult(resultId, user.getPersonId());
+            System.out.println("Result of deletion: " + result);
             if (result > 0) {
                 response.put("success", true);
                 response.put("message", "Lab result deleted successfully");
@@ -321,6 +325,7 @@ public class MedicalRecordController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } catch (Exception e) {
+            System.out.println("Exception during deletion: " + e.getMessage());
             response.put("success", false);
             response.put("message", "Lab result deletion failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
