@@ -52,6 +52,27 @@ public class MedicalRecordService {
 
     @Transactional
     public Long createMedicalRecord(MedicalRecord record, Long userId) {
+        // Print all fields before saving
+        System.out.println("======= Creating New Medical Record =======");
+        System.out.println("Record ID: " + record.getRecordId());
+        System.out.println("Patient ID: " + record.getPatientId());
+        System.out.println("Doctor ID: " + record.getDoctorId());
+        System.out.println("Department ID: " + record.getDepartmentId());
+        System.out.println("Treatment ID: " + record.getTreatmentId());
+        System.out.println("Record Type: " + record.getRecordType());
+        System.out.println("Title: " + record.getTitle());
+        System.out.println("Diagnosis: " + record.getDiagnosis());
+        System.out.println("Notes: " + record.getNotes());
+        System.out.println("Record Date: " + record.getRecordDate());
+        System.out.println("Blood Pressure: " + record.getBloodPressure());
+        System.out.println("Heart Rate: " + record.getHeartRate());
+        System.out.println("Respiratory Rate: " + record.getRespiratoryRate());
+        System.out.println("Temperature: " + record.getTemperature());
+        System.out.println("Oxygen Saturation: " + record.getOxygenSaturation());
+        System.out.println("Height: " + record.getHeight());
+        System.out.println("Weight: " + record.getWeight());
+        System.out.println("=======================================");
+        
         // Save the medical record
         Long recordId = medicalRecordRepository.save(record);
 
@@ -64,6 +85,27 @@ public class MedicalRecordService {
 
     @Transactional
     public int updateMedicalRecord(MedicalRecord record, Long userId) {
+        // Print all fields before updating
+        System.out.println("======= Updating Medical Record: " + record.getRecordId() + " =======");
+        System.out.println("Record ID: " + record.getRecordId());
+        System.out.println("Patient ID: " + record.getPatientId());
+        System.out.println("Doctor ID: " + record.getDoctorId());
+        System.out.println("Department ID: " + record.getDepartmentId());
+        System.out.println("Treatment ID: " + record.getTreatmentId());
+        System.out.println("Record Type: " + record.getRecordType());
+        System.out.println("Title: " + record.getTitle());
+        System.out.println("Diagnosis: " + record.getDiagnosis());
+        System.out.println("Notes: " + record.getNotes());
+        System.out.println("Record Date: " + record.getRecordDate());
+        System.out.println("Blood Pressure: " + record.getBloodPressure());
+        System.out.println("Heart Rate: " + record.getHeartRate());
+        System.out.println("Respiratory Rate: " + record.getRespiratoryRate());
+        System.out.println("Temperature: " + record.getTemperature());
+        System.out.println("Oxygen Saturation: " + record.getOxygenSaturation());
+        System.out.println("Height: " + record.getHeight());
+        System.out.println("Weight: " + record.getWeight());
+        System.out.println("=======================================");
+        
         int result = medicalRecordRepository.update(record);
 
         if (result > 0) {
@@ -159,6 +201,18 @@ public class MedicalRecordService {
     // Methods for handling lab results
     @Transactional
     public Long addLabResult(LabResult labResult, Long userId) {
+        // Print all fields before saving
+        System.out.println("======= Adding New Lab Result =======");
+        System.out.println("Result ID: " + labResult.getResultId());
+        System.out.println("Record ID: " + labResult.getRecordId());
+        System.out.println("Test Name: " + labResult.getTestName());
+        System.out.println("Test Value: " + labResult.getTestValue());
+        System.out.println("Test Unit: " + labResult.getTestUnit());
+        System.out.println("Reference Range: " + labResult.getReferenceRange());
+        System.out.println("Is Abnormal: " + labResult.getIsAbnormal());
+        System.out.println("Notes: " + labResult.getNotes());
+        System.out.println("=======================================");
+        
         Long resultId = labResultRepository.save(labResult);
 
         // Audit the lab result addition
@@ -179,6 +233,18 @@ public class MedicalRecordService {
 
     @Transactional
     public int updateLabResult(LabResult labResult, Long userId) {
+        // Print all fields before updating
+        System.out.println("======= Updating Lab Result: " + labResult.getResultId() + " =======");
+        System.out.println("Result ID: " + labResult.getResultId());
+        System.out.println("Record ID: " + labResult.getRecordId());
+        System.out.println("Test Name: " + labResult.getTestName());
+        System.out.println("Test Value: " + labResult.getTestValue());
+        System.out.println("Test Unit: " + labResult.getTestUnit());
+        System.out.println("Reference Range: " + labResult.getReferenceRange());
+        System.out.println("Is Abnormal: " + labResult.getIsAbnormal());
+        System.out.println("Notes: " + labResult.getNotes());
+        System.out.println("=======================================");
+        
         int result = labResultRepository.update(labResult);
 
         if (result > 0) {
