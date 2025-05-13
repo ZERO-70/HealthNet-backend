@@ -31,7 +31,7 @@ public class StaffRepository {
             staff.setBirthdate(rs.getDate("birthdate").toLocalDate());
             staff.setContact_info(rs.getString("contact_info"));
             staff.setAddress(rs.getString("address"));
-            staff.setProffession(rs.getString("proffession"));
+            staff.setProffession(rs.getString("profession")); // Map profession
             staff.setImage(rs.getBytes("image")); // Map image
             staff.setImage_type(rs.getString("image_type")); // Map image type
             return staff;
@@ -40,7 +40,7 @@ public class StaffRepository {
 
     public Optional<Staff> findStaffById(Long staffId) {
         String sql = "SELECT p.person_id, p.name, p.gender, p.age, p.birthdate, p.contact_info, p.address, " +
-                "p.image, p.image_type, s.proffession " +
+                "p.image, p.image_type, s.profession " +
                 "FROM staff s " +
                 "JOIN person p ON s.staff_id = p.person_id " +
                 "WHERE s.staff_id = ?";
@@ -49,7 +49,7 @@ public class StaffRepository {
 
     public List<Staff> findAllStaff() {
         String sql = "SELECT p.person_id, p.name, p.gender, p.age, p.birthdate, p.contact_info, p.address, " +
-                "p.image, p.image_type, s.proffession " +
+                "p.image, p.image_type, s.profession " +
                 "FROM staff s " +
                 "JOIN person p ON s.staff_id = p.person_id";
         return jdbcTemplate.query(sql, staffRowMapper);
@@ -69,7 +69,7 @@ public class StaffRepository {
 
     public int updateStaff(Staff staff) {
         // Update the profession in the Staff table
-        String staffSql = "UPDATE staff SET proffession = ? WHERE staff_id = ?";
+        String staffSql = "UPDATE staff SET profession = ? WHERE staff_id = ?";
         int rowsAffected = jdbcTemplate.update(staffSql, staff.getProffession(), staff.getId());
 
         // Update all fields in the Person table, including image and image_type
@@ -121,7 +121,7 @@ public class StaffRepository {
         Long generatedStaffId = keyHolder.getKey().longValue();
 
         // Insert into Staff table using the generated staff_id
-        String staffSql = "INSERT INTO staff (staff_id, proffession) VALUES (?, ?)";
+        String staffSql = "INSERT INTO staff (staff_id, profession) VALUES (?, ?)";
         if (jdbcTemplate.update(staffSql, generatedStaffId, staff.getProffession()) > 0) {
             return generatedStaffId;
         } else {
