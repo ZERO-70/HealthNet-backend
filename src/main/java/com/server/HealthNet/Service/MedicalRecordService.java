@@ -72,7 +72,7 @@ public class MedicalRecordService {
         System.out.println("Height: " + record.getHeight());
         System.out.println("Weight: " + record.getWeight());
         System.out.println("=======================================");
-        
+
         // Save the medical record
         Long recordId = medicalRecordRepository.save(record);
 
@@ -81,7 +81,9 @@ public class MedicalRecordService {
         auditRepository.save(audit);
 
         return recordId;
-    }    @Transactional
+    }
+
+    @Transactional
     public int updateMedicalRecord(MedicalRecord record, Long userId) {
         // Print all fields before updating
         System.out.println("======= Updating Medical Record: " + record.getRecordId() + " =======");
@@ -102,38 +104,41 @@ public class MedicalRecordService {
         System.out.println("Oxygen Saturation: " + record.getOxygenSaturation());
         System.out.println("Height: " + record.getHeight());
         System.out.println("Weight: " + record.getWeight());
-        
+
         // Log nested objects
-        System.out.println("Lab Results Count: " + (record.getLabResults() != null ? record.getLabResults().size() : 0));
-        System.out.println("Attachments Count: " + (record.getAttachments() != null ? record.getAttachments().size() : 0));
+        System.out
+                .println("Lab Results Count: " + (record.getLabResults() != null ? record.getLabResults().size() : 0));
+        System.out.println(
+                "Attachments Count: " + (record.getAttachments() != null ? record.getAttachments().size() : 0));
         System.out.println("=======================================");
-        
+
         // Update the main medical record
         int result = medicalRecordRepository.update(record);
 
         // Process lab results if they exist
         if (record.getLabResults() != null && !record.getLabResults().isEmpty()) {
             System.out.println("Processing lab results for record: " + record.getRecordId());
-            
+
             // Get existing lab results
             List<LabResult> existingLabResults = labResultRepository.findByRecordId(record.getRecordId());
-            
+
             for (LabResult labResult : record.getLabResults()) {
                 // Set the record ID to ensure proper association
                 labResult.setRecordId(record.getRecordId());
-                
+
                 // Check if this is an update (has ID) or new lab result
                 if (labResult.getResultId() != null) {
                     // Check if this lab result exists in the database
                     boolean exists = existingLabResults.stream()
                             .anyMatch(existing -> existing.getResultId().equals(labResult.getResultId()));
-                    
+
                     if (exists) {
                         System.out.println("Updating existing lab result: " + labResult.getResultId());
                         updateLabResult(labResult, userId);
                     } else {
                         // ID was provided but doesn't exist, add as new
-                        System.out.println("Adding new lab result with provided ID (might cause conflicts): " + labResult.getResultId());
+                        System.out.println("Adding new lab result with provided ID (might cause conflicts): "
+                                + labResult.getResultId());
                         addLabResult(labResult, userId);
                     }
                 } else {
@@ -143,39 +148,43 @@ public class MedicalRecordService {
                 }
             }
         }
-        
+
         // Process attachments if they exist
         if (record.getAttachments() != null && !record.getAttachments().isEmpty()) {
             System.out.println("Processing attachments for record: " + record.getRecordId());
-            
+
             // Get existing attachments
-            List<MedicalRecordAttachment> existingAttachments = attachmentRepository.findByRecordId(record.getRecordId());
-            
+            List<MedicalRecordAttachment> existingAttachments = attachmentRepository
+                    .findByRecordId(record.getRecordId());
+
             for (MedicalRecordAttachment attachment : record.getAttachments()) {
                 // Set the record ID to ensure proper association
                 attachment.setRecordId(record.getRecordId());
-                
+
                 // Check if this is an update (has ID) or new attachment
                 if (attachment.getAttachmentId() != null) {
                     // Check if this attachment exists in the database
                     boolean exists = existingAttachments.stream()
                             .anyMatch(existing -> existing.getAttachmentId().equals(attachment.getAttachmentId()));
-                    
+
                     if (exists) {
                         System.out.println("Updating existing attachment: " + attachment.getAttachmentId());
                         attachmentRepository.update(attachment);
-                        
+
                         // Audit the attachment update
-                        MedicalRecordAudit audit = new MedicalRecordAudit(record.getRecordId(), userId, "ATTACHMENT_UPDATE",
+                        MedicalRecordAudit audit = new MedicalRecordAudit(record.getRecordId(), userId,
+                                "ATTACHMENT_UPDATE",
                                 "Updated attachment: " + attachment.getFileName());
                         auditRepository.save(audit);
                     } else {
                         // ID was provided but doesn't exist, treat as new
-                        System.out.println("Adding new attachment with provided ID (might cause conflicts): " + attachment.getAttachmentId());
+                        System.out.println("Adding new attachment with provided ID (might cause conflicts): "
+                                + attachment.getAttachmentId());
                         attachmentRepository.save(attachment);
-                        
+
                         // Audit the attachment addition
-                        MedicalRecordAudit audit = new MedicalRecordAudit(record.getRecordId(), userId, "ATTACHMENT_ADD",
+                        MedicalRecordAudit audit = new MedicalRecordAudit(record.getRecordId(), userId,
+                                "ATTACHMENT_ADD",
                                 "Added attachment: " + attachment.getFileName());
                         auditRepository.save(audit);
                     }
@@ -183,7 +192,7 @@ public class MedicalRecordService {
                     // No ID, add as new attachment
                     System.out.println("Adding new attachment");
                     attachmentRepository.save(attachment);
-                    
+
                     // Audit the attachment addition
                     MedicalRecordAudit audit = new MedicalRecordAudit(record.getRecordId(), userId, "ATTACHMENT_ADD",
                             "Added attachment: " + attachment.getFileName());
@@ -296,7 +305,7 @@ public class MedicalRecordService {
         System.out.println("Is Abnormal: " + labResult.getIsAbnormal());
         System.out.println("Notes: " + labResult.getNotes());
         System.out.println("=======================================");
-        
+
         Long resultId = labResultRepository.save(labResult);
 
         // Audit the lab result addition
@@ -328,7 +337,7 @@ public class MedicalRecordService {
         System.out.println("Is Abnormal: " + labResult.getIsAbnormal());
         System.out.println("Notes: " + labResult.getNotes());
         System.out.println("=======================================");
-        
+
         int result = labResultRepository.update(labResult);
 
         if (result > 0) {
