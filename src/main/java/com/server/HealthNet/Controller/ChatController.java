@@ -3,6 +3,9 @@ package com.server.HealthNet.Controller;
 import com.server.HealthNet.Model.Chat;
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.UserAuthentication;
+import com.server.HealthNet.Model.ApiQueryRequest;
+import com.server.HealthNet.Model.ApiQueryResponse;
+import com.server.HealthNet.Model.QueryRequest;
 import com.server.HealthNet.Service.ChatService;
 import com.server.HealthNet.Service.UserAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,14 +98,43 @@ public class ChatController {
         return res > 0
                 ? new ResponseEntity<>("Chat deleted", HttpStatus.OK)
                 : new ResponseEntity<>("Deletion failed", HttpStatus.BAD_REQUEST);
-    }
+    } // Get chats for current user
 
-    // Get chats for current user
     @GetMapping("/getmine")
     @PreAuthorize("isAuthenticated()")
     public List<Chat> getMyChats() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
         return chatService.getChatsByPersonId(user.getPersonId());
+    }
+
+    // Process a query and get response from external API
+    @PostMapping("/query")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiQueryResponse> processQuery(@RequestBody QueryRequest queryRequest) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserAuthentication user = userAuthService.getUserByUsername(username);
+
+        // Create request object for the external API
+        ApiQueryRequest apiRequest = new ApiQueryRequest();
+        apiRequest.setQuery(queryRequest.getQuery());
+
+        // Set the role and ID based on the authenticated user's role
+        String roleStr = user.getRole().toString();
+        apiRequest.setRole(roleStr.toLowerCase());
+
+        String personIdStr = user.getPersonId().toString();
+        if (user.getRole() == Role.PATIENT) {
+            apiRequest.setPatient_id(personIdStr);
+        } else if (user.getRole() == Role.DOCTOR) {
+            apiRequest.setDoctor_id(personIdStr);
+        } else if (user.getRole() == Role.ADMIN) {
+            apiRequest.setDoctor_id(personIdStr); // As per requirements, use "doctor_id" for admin
+        }
+
+        // Process the query through the service
+        ApiQueryResponse response = chatService.processQuery(apiRequest, user.getPersonId());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
