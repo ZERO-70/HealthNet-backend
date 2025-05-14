@@ -35,14 +35,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())).authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/user_authentication/register",
                                 "/user_authentication/login", "/user_authentication/exists/{username}",
                                 "/home",
                                 "/doctor",
-                                "/patient")
+                                "/patient",
+                                "/chat/query")
                         .permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())

@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.logging.Logger;
 
 @Service
 public class ChatService {
@@ -83,6 +82,46 @@ public class ChatService {
             chat.setTimestamp(LocalDateTime.now());
 
             createChat(chat);
+
+            return errorResponse;
+        }
+    }
+
+    /**
+     * Process a query without authentication - does not store in database
+     * Sets role and patient_id to null
+     * 
+     * @param query The user query text
+     * @return API response
+     */
+    public ApiQueryResponse processUnauthenticatedQuery(String query) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request with null patient_id and role
+            ApiQueryRequest apiRequest = new ApiQueryRequest();
+            apiRequest.setQuery(query);
+            apiRequest.setRole(null);
+            apiRequest.setPatient_id(null);
+            apiRequest.setDoctor_id(null);
+
+            HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(apiRequest, headers);
+
+            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+
+            // Print response to console
+            logger.info("Unauthenticated query: " + query);
+            logger.info("Response: " + (response != null ? response.getResponse() : "No response"));
+
+            return response;
+        } catch (Exception e) {
+            // Handle any exceptions (network issues, API errors, etc.)
+            ApiQueryResponse errorResponse = new ApiQueryResponse("Error processing query: " + e.getMessage());
+
+            // Print error to console
+            logger.severe("Error processing unauthenticated query: " + e.getMessage());
 
             return errorResponse;
         }

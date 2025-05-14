@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -109,13 +110,25 @@ public class ChatController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
         return chatService.getChatsByPersonId(user.getPersonId());
-    }
+    } // Process a query and get response from external API
 
-    // Process a query and get response from external API
     @PostMapping("/query")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiQueryResponse> processQuery(@RequestBody QueryRequest queryRequest) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Check if the user is authenticated
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // If not authenticated or anonymous authentication, process as unauthenticated
+        if (authentication == null ||
+                "anonymousUser".equals(authentication.getPrincipal()) ||
+                !authentication.isAuthenticated()) {
+
+            // Process without authentication - no database storage
+            ApiQueryResponse response = chatService.processUnauthenticatedQuery(queryRequest.getQuery());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        // Handle authenticated request
+        String username = authentication.getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
 
         // Create request object for the external API
