@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class SuggestionService {
      * Fetches medical advice for a patient from external API and saves it as a
      * suggestion
      */
-    public void fetchAndSaveMedicalAdvice(Long patientId) {
+    public Suggestion fetchAndSaveMedicalAdvice(Long patientId) {
         String apiUrl = "http://159.89.49.64:7898/api/medical-advice";
 
         HttpHeaders headers = new HttpHeaders();
@@ -77,14 +78,13 @@ public class SuggestionService {
         requestBody.put("patient_id", patientId.toString());
 
         HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-
+        Suggestion suggestion = new Suggestion();
         try {
             Map<String, String> response = restTemplate.postForObject(apiUrl, request, Map.class);
 
             if (response != null && response.containsKey("advice")) {
                 String adviceText = response.get("advice");
 
-                Suggestion suggestion = new Suggestion();
                 suggestion.setPersonId(patientId);
                 suggestion.setSuggestionText(adviceText);
                 suggestion.setCreatedAt(LocalDateTime.now());
@@ -94,12 +94,13 @@ public class SuggestionService {
         } catch (Exception e) {
             System.err.println("Error fetching medical advice for patient " + patientId + ": " + e.getMessage());
         }
+        return suggestion;
     }
 
     /**
      * Scheduled task to run daily at midnight to fetch suggestions for all patients
      */
-    @Scheduled(cron = "0 35 20 * * ?") // Run at midnight every day
+    @Scheduled(cron = "0 59 00 * * ?") // Run at midnight every day
     public void fetchDailySuggestions() {
         // First, delete all existing suggestions from the table
         int deletedCount = suggestionRepository.deleteAll();
@@ -110,7 +111,39 @@ public class SuggestionService {
 
         // Process each patient ID
         for (Long patientId : patientIds) {
-            fetchAndSaveMedicalAdvice(patientId);
+
+            Suggestion suggestion = fetchAndSaveMedicalAdvice(patientId);
+
+            if (suggestion != null && patientId == 32) {
+                try {
+                    // Create a simple JSON representation for logging
+                    String jsonLike = String.format(
+                            "{\"personId\": %d, \"suggestionText\": \"%s\", \"createdAt\": \"%s\"}",
+                            suggestion.getPersonId(),
+                            suggestion.getSuggestionText().replace("\"", "\\\""),
+                            suggestion.getCreatedAt());
+
+                    // Print the JSON to console
+                    System.out.println("Sending suggestion to MAI API: " + jsonLike);
+
+                    // Create headers
+                    HttpHeaders maiHeaders = new HttpHeaders();
+                    maiHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+                    // Create request entity with suggestion object
+                    HttpEntity<Suggestion> maiRequest = new HttpEntity<>(suggestion, maiHeaders);
+
+                    // Send POST request to MAI endpoint
+                    String response = restTemplate.postForObject("http://159.89.49.64:7898/api/email", maiRequest,
+                            String.class);
+
+                    System.out.println(
+                            "Successfully sent suggestion for patient ID: " + patientId + ", Response: " + response);
+                } catch (Exception e) {
+                    System.err.println(
+                            "Error sending suggestion to MAI API for patient " + patientId + ": " + e.getMessage());
+                }
+            }
         }
 
         // Update the last suggestion update date
