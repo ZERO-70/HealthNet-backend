@@ -63,4 +63,9 @@ public class ChatRepository {
         String sql = "DELETE FROM chat WHERE message_id = ?";
         return jdbcTemplate.update(sql, id);
     }
+
+    public int deleteOlderThan(LocalDateTime date) {
+        String sql = "DELETE FROM chat WHERE timestamp < ?";
+        return jdbcTemplate.update(sql, date);
+    }
 }
