@@ -8,14 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Logger;
 
 @Service
 public class ChatService {
+
+    private static final Logger logger = Logger.getLogger(ChatService.class.getName());
 
     @Autowired
     private ChatRepository chatRepository;
@@ -81,5 +86,28 @@ public class ChatService {
 
             return errorResponse;
         }
+    }
+
+    /**
+     * Deletes chats older than the specified number of days
+     * 
+     * @param days The number of days threshold for deletion
+     * @return Number of records deleted
+     */
+    public int deleteChatsOlderThanDays(int days) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+        logger.info("Deleting chats older than: " + cutoffDate);
+        int deletedCount = chatRepository.deleteOlderThan(cutoffDate);
+        logger.info("Deleted " + deletedCount + " old chat records");
+        return deletedCount;
+    }
+
+    /**
+     * Scheduled task that runs daily at 1:00 AM to delete chats older than 3 days
+     */
+    @Scheduled(cron = "0 0 1 * * ?") // Run at 1:00 AM daily
+    public void scheduledChatCleanup() {
+        logger.info("Running scheduled chat cleanup task");
+        deleteChatsOlderThanDays(3);
     }
 }

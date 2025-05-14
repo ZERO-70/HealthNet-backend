@@ -16,6 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/chat")
@@ -98,8 +100,9 @@ public class ChatController {
         return res > 0
                 ? new ResponseEntity<>("Chat deleted", HttpStatus.OK)
                 : new ResponseEntity<>("Deletion failed", HttpStatus.BAD_REQUEST);
-    } // Get chats for current user
+    }
 
+    // Get chats for current user
     @GetMapping("/getmine")
     @PreAuthorize("isAuthenticated()")
     public List<Chat> getMyChats() {
@@ -134,6 +137,20 @@ public class ChatController {
 
         // Process the query through the service
         ApiQueryResponse response = chatService.processQuery(apiRequest, user.getPersonId());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // Admin: cleanup old chats
+    @PostMapping("/cleanup")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> cleanupOldChats(@RequestParam(defaultValue = "3") int days) {
+        int deletedCount = chatService.deleteChatsOlderThanDays(days);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Deleted " + deletedCount + " chats older than " + days + " days");
+        response.put("deletedCount", deletedCount);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
