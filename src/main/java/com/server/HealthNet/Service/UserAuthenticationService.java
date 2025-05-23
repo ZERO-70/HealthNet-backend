@@ -1,5 +1,7 @@
 package com.server.HealthNet.Service;
 
+import com.server.HealthNet.Model.Role;
+import com.server.HealthNet.Model.Subscription;
 import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Repository.UserAuthenticationRepository;
 
@@ -30,7 +32,21 @@ public class UserAuthenticationService {
     }
 
     public int createUser(UserAuthentication userAuthentication) {
+        // Encode the password
         userAuthentication.setPassword(bcrypt.encode(userAuthentication.getPassword()));
+
+        // Set default subscription based on role
+        if (userAuthentication.getSubscription() == null) {
+            if (userAuthentication.getRole() == Role.ADMIN || userAuthentication.getRole() == Role.STAFF) {
+                userAuthentication.setSubscription(Subscription.PLUS);
+            } else {
+                userAuthentication.setSubscription(Subscription.DEFAULT);
+            }
+        } else if (userAuthentication.getRole() == Role.ADMIN || userAuthentication.getRole() == Role.STAFF) {
+            // Ensure ADMIN and STAFF always have PLUS subscription
+            userAuthentication.setSubscription(Subscription.PLUS);
+        }
+
         return userAuthenticationRepository.save(userAuthentication);
     }
 
@@ -45,6 +61,10 @@ public class UserAuthenticationService {
     public int updateUser(UserAuthentication userAuthentication) {
         userAuthentication.setPassword(bcrypt.encode(userAuthentication.getPassword()));
         return userAuthenticationRepository.update(userAuthentication);
+    }
+
+    public int updateUserSubscription(String username, Subscription subscription) {
+        return userAuthenticationRepository.updateSubscription(username, subscription.name());
     }
 
     public int deleteUser(String username) {
@@ -69,5 +89,9 @@ public class UserAuthenticationService {
     public boolean doesUsernameExist(String username) {
         List<String> usernames = userAuthenticationRepository.getAllUsernames();
         return usernames.contains(username);
+    }
+
+    public String extractUsernameFromToken(String token) {
+        return jwTservice.extractusername(token);
     }
 }
