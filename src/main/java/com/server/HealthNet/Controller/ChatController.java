@@ -177,25 +177,12 @@ public class ChatController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> cleanupOldChats(@RequestParam(defaultValue = "3") int days) {
         int deletedCount = chatService.deleteChatsOlderThanDays(days);
+
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", "Deleted " + deletedCount + " chats older than " + days + " days");
         response.put("deletedCount", deletedCount);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    // Test API connectivity - for debugging network issues
-    @GetMapping("/test-connectivity")
-    public ResponseEntity<Map<String, String>> testApiConnectivity() {
-        Map<String, String> response = new HashMap<>();
-        String result = chatService.testApiConnectivity();
-        response.put("connectivity_test", result);
-
-        if (result.startsWith("SUCCESS")) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
-        }
     }
 }
