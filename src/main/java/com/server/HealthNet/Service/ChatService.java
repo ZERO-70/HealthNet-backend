@@ -266,32 +266,21 @@ public class ChatService {
      * Test connectivity to the external API
      */
     public String testApiConnectivity() {
-        StringBuilder result = new StringBuilder();
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        for (String apiUrl : BACKUP_URLS) {
-            try {
-                RestTemplate restTemplate = new RestTemplate();
+            // Configure request factory with shorter timeout for testing
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(10000); // 10 seconds
+            factory.setReadTimeout(10000); // 10 seconds
+            restTemplate.setRequestFactory(factory);
 
-                // Configure request factory with shorter timeout for testing
-                org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-                factory.setConnectTimeout(10000); // 10 seconds
-                factory.setReadTimeout(10000); // 10 seconds
-                restTemplate.setRequestFactory(factory);
-
-                // Try to connect to the API
-                String testResponse = restTemplate.getForObject(apiUrl, String.class);
-                result.append("SUCCESS: Connected to ").append(apiUrl).append(". Response: ").append(testResponse)
-                        .append(" | ");
-                return result.toString(); // Return on first success
-            } catch (Exception e) {
-                result.append("FAILED: ").append(apiUrl).append(" - Error: ").append(e.getMessage());
-                if (e.getCause() != null) {
-                    result.append(". Cause: ").append(e.getCause().getMessage());
-                }
-                result.append(" | ");
-            }
+            // Try to connect to the API
+            String testResponse = restTemplate.getForObject(QUERY_API_URL, String.class);
+            return "SUCCESS: Connected to API. Response: " + testResponse;
+        } catch (Exception e) {
+            return "FAILED: Cannot connect to API. Error: " + e.getMessage() +
+                    ". Cause: " + (e.getCause() != null ? e.getCause().getMessage() : "Unknown");
         }
-
-        return result.toString();
     }
 }
