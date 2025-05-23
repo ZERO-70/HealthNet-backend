@@ -5,6 +5,7 @@ public class ApiQueryRequest {
     private String doctor_id;
     private String role;
     private String query;
+    private ModelType model;
 
     public ApiQueryRequest() {
     }
@@ -12,6 +13,7 @@ public class ApiQueryRequest {
     public ApiQueryRequest(String role, String query) {
         this.role = role;
         this.query = query;
+        this.model = ModelType.FAST; // Default to FAST
     }
 
     // Constructor for doctor or patient
@@ -23,6 +25,26 @@ public class ApiQueryRequest {
         }
         this.role = role.toLowerCase();
         this.query = query;
+        this.model = ModelType.FAST; // Default to FAST
+    }
+
+    // Constructor with model type specified
+    public ApiQueryRequest(String id, String role, String query, ModelType model) {
+        if (role.equals("PATIENT")) {
+            this.patient_id = id;
+        } else if (role.equals("DOCTOR")) {
+            this.doctor_id = id;
+        }
+        this.role = role.toLowerCase();
+        this.query = query;
+        this.model = model;
+    }
+
+    // Constructor without ID but with model type
+    public ApiQueryRequest(String role, String query, ModelType model) {
+        this.role = role;
+        this.query = query;
+        this.model = model;
     }
 
     public String getPatient_id() {
@@ -55,5 +77,13 @@ public class ApiQueryRequest {
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    public ModelType getModel() {
+        return model;
+    }
+
+    public void setModel(ModelType model) {
+        this.model = model;
     }
 }
