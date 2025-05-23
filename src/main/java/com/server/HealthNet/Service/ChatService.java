@@ -62,7 +62,15 @@ public class ChatService {
             System.out.println("Model: " + request.getModel());
             System.out.println("================================================");
 
+            // Create RestTemplate with increased timeout
             RestTemplate restTemplate = new RestTemplate();
+
+            // Configure request factory with longer timeouts (120 seconds)
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(120000); // 120 seconds connection timeout
+            factory.setReadTimeout(120000); // 120 seconds read timeout
+            restTemplate.setRequestFactory(factory);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -106,7 +114,15 @@ public class ChatService {
      */
     public ApiQueryResponse processUnauthenticatedQuery(String query) {
         try {
+            // Create RestTemplate with increased timeout
             RestTemplate restTemplate = new RestTemplate();
+
+            // Configure request factory with longer timeouts (120 seconds)
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(120000); // 120 seconds connection timeout
+            factory.setReadTimeout(120000); // 120 seconds read timeout
+            restTemplate.setRequestFactory(factory);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -144,12 +160,18 @@ public class ChatService {
 
             return errorResponse;
         }
-    }
+    } // Add new method with ModelType parameter
 
-    // Add new method with ModelType parameter
     public ApiQueryResponse processUnauthenticatedQuery(String query, ModelType model) {
         try {
             RestTemplate restTemplate = new RestTemplate();
+
+            // Configure request factory with longer timeouts (120 seconds)
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(120000); // 120 seconds connection timeout
+            factory.setReadTimeout(120000); // 120 seconds read timeout
+            restTemplate.setRequestFactory(factory);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
