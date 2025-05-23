@@ -44,7 +44,6 @@ com\server\HealthNet\Service\JWTservice.class
 com\server\HealthNet\Repository\StaffRepository$1.class
 com\server\HealthNet\Model\Department.class
 com\server\HealthNet\Service\AppointmentService.class
-com\server\HealthNet\Service\ChatService.class
 com\server\HealthNet\Model\Appointment.class
 com\server\HealthNet\Model\MedicalRecord.class
 com\server\HealthNet\Service\PersonService.class
@@ -64,7 +63,6 @@ com\server\HealthNet\Model\Inventory.class
 com\server\HealthNet\Repository\AvalibilityRepository$AvalibilityRowMapper.class
 com\server\HealthNet\Model\UserAuthentication.class
 com\server\HealthNet\Repository\MedicalRecordAttachmentRepository.class
-com\server\HealthNet\Controller\ChatController.class
 com\server\HealthNet\Controller\UserAuthenticationController.class
 com\server\HealthNet\SecurityConfig\CorsConfig$1.class
 com\server\HealthNet\Repository\PatientRepository$1.class
