@@ -27,6 +27,12 @@ public class ChatService {
 
     private final String QUERY_API_URL = "http://159.89.49.64:7898/api/query";
 
+    // Alternative URLs to try if the main one fails
+    private final String[] BACKUP_URLS = {
+            "http://159.89.49.64:7898/api/query",
+            "https://159.89.49.64:7898/api/query" // Try HTTPS version
+    };
+
     public List<Chat> getAllChats() {
         return chatRepository.findAll();
     }
@@ -73,10 +79,29 @@ public class ChatService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(request, headers);
 
-            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+            // Try multiple URLs in case of network issues
+            ApiQueryResponse response = null;
+            Exception lastException = null;
+
+            for (String apiUrl : BACKUP_URLS) {
+                try {
+                    System.out.println("Attempting API call to: " + apiUrl);
+                    response = restTemplate.postForObject(apiUrl, entity, ApiQueryResponse.class);
+                    System.out.println("SUCCESS: API call worked with URL: " + apiUrl);
+                    break; // Exit loop if successful
+                } catch (Exception e) {
+                    lastException = e;
+                    System.out.println("FAILED: API call failed with URL: " + apiUrl + " - Error: " + e.getMessage());
+                    logger.warning("Failed to connect to " + apiUrl + ": " + e.getMessage());
+                }
+            }
+
+            // If all URLs failed, throw the last exception
+            if (response == null && lastException != null) {
+                throw lastException;
+            }
 
             // Save the chat in the database
             Chat chat = new Chat();
@@ -153,10 +178,11 @@ public class ChatService {
             return response;
         } catch (Exception e) {
             // Handle any exceptions (network issues, API errors, etc.)
-            ApiQueryResponse errorResponse = new ApiQueryResponse("Error processing query: " + e.getMessage());
-
-            // Print error to console logger.severe("Error processing unauthenticated query:
-            // " + e.getMessage());
+            ApiQueryResponse errorResponse = new ApiQueryResponse("Error processing query: " + e.getMessage()); // Print
+                                                                                                                // error
+                                                                                                                // to
+                                                                                                                // console
+            logger.severe("Error processing unauthenticated query: " + e.getMessage());
 
             return errorResponse;
         }
@@ -234,5 +260,38 @@ public class ChatService {
     public void scheduledChatCleanup() {
         logger.info("Running scheduled chat cleanup task");
         deleteChatsOlderThanDays(3);
+    }
+
+    /**
+     * Test connectivity to the external API
+     */
+    public String testApiConnectivity() {
+        StringBuilder result = new StringBuilder();
+
+        for (String apiUrl : BACKUP_URLS) {
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+
+                // Configure request factory with shorter timeout for testing
+                org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+                factory.setConnectTimeout(10000); // 10 seconds
+                factory.setReadTimeout(10000); // 10 seconds
+                restTemplate.setRequestFactory(factory);
+
+                // Try to connect to the API
+                String testResponse = restTemplate.getForObject(apiUrl, String.class);
+                result.append("SUCCESS: Connected to ").append(apiUrl).append(". Response: ").append(testResponse)
+                        .append(" | ");
+                return result.toString(); // Return on first success
+            } catch (Exception e) {
+                result.append("FAILED: ").append(apiUrl).append(" - Error: ").append(e.getMessage());
+                if (e.getCause() != null) {
+                    result.append(". Cause: ").append(e.getCause().getMessage());
+                }
+                result.append(" | ");
+            }
+        }
+
+        return result.toString();
     }
 }
