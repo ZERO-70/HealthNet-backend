@@ -9,18 +9,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 @Service
+@EnableAsync
 public class ChatService {
 
     private static final Logger logger = Logger.getLogger(ChatService.class.getName());
+
+    // Store for tracking async operations
+    private final ConcurrentHashMap<String, ApiQueryResponse> responseCache = new ConcurrentHashMap<>();
 
     @Autowired
     private ChatRepository chatRepository;
@@ -62,13 +70,14 @@ public class ChatService {
             System.out.println("Model: " + request.getModel());
             System.out.println("================================================");
 
-            // Create RestTemplate with increased timeout
+            // Create RestTemplate with shorter timeout for immediate response check
             RestTemplate restTemplate = new RestTemplate();
 
-            // Configure request factory with longer timeouts (120 seconds)
+            // Configure request factory with shorter timeouts (15 seconds for quick
+            // response)
             org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(120000); // 120 seconds connection timeout
-            factory.setReadTimeout(120000); // 120 seconds read timeout
+            factory.setConnectTimeout(15000); // 15 seconds connection timeout
+            factory.setReadTimeout(15000); // 15 seconds read timeout
             restTemplate.setRequestFactory(factory);
 
             HttpHeaders headers = new HttpHeaders();
@@ -89,19 +98,79 @@ public class ChatService {
 
             return response;
         } catch (Exception e) {
-            // Handle any exceptions (network issues, API errors, etc.)
-            ApiQueryResponse errorResponse = new ApiQueryResponse("Error processing query: " + e.getMessage());
+            // If timeout occurs, start async processing and return pending response
+            logger.info("Quick response failed, starting async processing: " + e.getMessage());
 
-            // Still save the failed attempt in the database
+            // Start async processing
+            processQueryAsync(request, personId);
+
+            // Return immediate response indicating processing
+            ApiQueryResponse pendingResponse = new ApiQueryResponse(
+                    "Your query is being processed. This may take a few minutes due to the complexity of the request. "
+                            +
+                            "Please check back in a moment or refresh the chat to see the response.");
+
+            // Save the pending response in the database
             Chat chat = new Chat();
             chat.setPersonId(personId);
             chat.setRequest(request.getQuery());
+            chat.setResponse(pendingResponse.getResponse());
+            chat.setTimestamp(LocalDateTime.now());
+
+            createChat(chat);
+
+            return pendingResponse;
+        }
+    }
+
+    @Async("taskExecutor")
+    public CompletableFuture<ApiQueryResponse> processQueryAsync(ApiQueryRequest request, Long personId) {
+        try {
+            logger.info("Starting async processing for query: " + request.getQuery());
+
+            // Create RestTemplate with longer timeout for async processing
+            RestTemplate restTemplate = new RestTemplate();
+
+            // Configure request factory with longer timeouts (5 minutes)
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(300000); // 5 minutes connection timeout
+            factory.setReadTimeout(300000); // 5 minutes read timeout
+            restTemplate.setRequestFactory(factory);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(request, headers);
+
+            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+
+            // Save the final response in the database
+            Chat chat = new Chat();
+            chat.setPersonId(personId);
+            chat.setRequest(request.getQuery() + " [FINAL RESPONSE]");
+            chat.setResponse(response != null ? response.getResponse() : "Error: No response from server");
+            chat.setTimestamp(LocalDateTime.now());
+
+            createChat(chat);
+
+            logger.info("Async processing completed for query: " + request.getQuery());
+
+            return CompletableFuture.completedFuture(response);
+        } catch (Exception e) {
+            logger.severe("Async processing failed: " + e.getMessage());
+
+            // Save the error response
+            ApiQueryResponse errorResponse = new ApiQueryResponse("Error processing query: " + e.getMessage());
+
+            Chat chat = new Chat();
+            chat.setPersonId(personId);
+            chat.setRequest(request.getQuery() + " [ERROR]");
             chat.setResponse(errorResponse.getResponse());
             chat.setTimestamp(LocalDateTime.now());
 
             createChat(chat);
 
-            return errorResponse;
+            return CompletableFuture.completedFuture(errorResponse);
         }
     }
 
