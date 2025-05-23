@@ -102,16 +102,17 @@ public class ChatController {
         return res > 0
                 ? new ResponseEntity<>("Chat deleted", HttpStatus.OK)
                 : new ResponseEntity<>("Deletion failed", HttpStatus.BAD_REQUEST);
-    }    // Get chats for current user
+    } // Get chats for current user
+
     @GetMapping("/getmine")
     @PreAuthorize("isAuthenticated()")
     public List<Chat> getMyChats() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
         return chatService.getChatsByPersonId(user.getPersonId());
-    } 
-    
-    // Process a query and get response from external API 
+    }
+
+    // Process a query and get response from external API
     @PostMapping("/query")
     public ResponseEntity<ApiQueryResponse> processQuery(@RequestBody QueryRequest queryRequest) {
         // Print the query request for debugging
@@ -139,13 +140,16 @@ public class ChatController {
         apiRequest.setQuery(queryRequest.getQuery());
 
         // Set the model type from the request (will default to FAST if not specified)
-        apiRequest.setModel(queryRequest.getModel());
-
-        // Set the role and ID based on the authenticated user's role
+        apiRequest.setModel(queryRequest.getModel()); // Set the role and ID based on the authenticated user's role
         String roleStr = user.getRole().toString();
         apiRequest.setRole(roleStr.toLowerCase());
 
         String personIdStr = user.getPersonId().toString();
+        // Explicitly set both IDs to null first
+        apiRequest.setPatient_id(null);
+        apiRequest.setDoctor_id(null);
+
+        // Then set the appropriate ID based on role
         if (user.getRole() == Role.PATIENT) {
             apiRequest.setPatient_id(personIdStr);
         } else if (user.getRole() == Role.DOCTOR) {
