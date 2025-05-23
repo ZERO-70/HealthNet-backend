@@ -3,6 +3,7 @@ package com.server.HealthNet.Service;
 import com.server.HealthNet.Model.Chat;
 import com.server.HealthNet.Model.ApiQueryRequest;
 import com.server.HealthNet.Model.ApiQueryResponse;
+import com.server.HealthNet.Model.ModelType;
 import com.server.HealthNet.Repository.ChatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -52,6 +53,15 @@ public class ChatService {
 
     public ApiQueryResponse processQuery(ApiQueryRequest request, Long personId) {
         try {
+            // Debug: Print the full request to the console
+            System.out.println("==== ChatService: Processing API Query Request ====");
+            System.out.println("Patient ID: " + request.getPatient_id());
+            System.out.println("Doctor ID: " + request.getDoctor_id());
+            System.out.println("Role: " + request.getRole());
+            System.out.println("Query: " + request.getQuery());
+            System.out.println("Model: " + request.getModel());
+            System.out.println("================================================");
+
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -106,6 +116,59 @@ public class ChatService {
             apiRequest.setRole(null);
             apiRequest.setPatient_id(null);
             apiRequest.setDoctor_id(null);
+
+            // Debug: Print the unauthenticated request to console
+            System.out.println("==== ChatService: Processing Unauthenticated Query ====");
+            System.out.println("Patient ID: " + apiRequest.getPatient_id());
+            System.out.println("Doctor ID: " + apiRequest.getDoctor_id());
+            System.out.println("Role: " + apiRequest.getRole());
+            System.out.println("Query: " + apiRequest.getQuery());
+            System.out.println("Model: " + apiRequest.getModel());
+            System.out.println("==================================================");
+
+            HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(apiRequest, headers);
+
+            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+
+            // Print response to console
+            logger.info("Unauthenticated query: " + query);
+            logger.info("Response: " + (response != null ? response.getResponse() : "No response"));
+
+            return response;
+        } catch (Exception e) {
+            // Handle any exceptions (network issues, API errors, etc.)
+            ApiQueryResponse errorResponse = new ApiQueryResponse("Error processing query: " + e.getMessage());
+
+            // Print error to console
+            logger.severe("Error processing unauthenticated query: " + e.getMessage());
+
+            return errorResponse;
+        }
+    }
+
+    // Add new method with ModelType parameter
+    public ApiQueryResponse processUnauthenticatedQuery(String query, ModelType model) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request with null patient_id and role
+            ApiQueryRequest apiRequest = new ApiQueryRequest();
+            apiRequest.setQuery(query);
+            apiRequest.setRole(null);
+            apiRequest.setPatient_id(null);
+            apiRequest.setDoctor_id(null);
+            apiRequest.setModel(model); // Set the specified model
+
+            // Debug: Print the unauthenticated request to console
+            System.out.println("==== ChatService: Processing Unauthenticated Query ====");
+            System.out.println("Patient ID: " + apiRequest.getPatient_id());
+            System.out.println("Doctor ID: " + apiRequest.getDoctor_id());
+            System.out.println("Role: " + apiRequest.getRole());
+            System.out.println("Query: " + apiRequest.getQuery());
+            System.out.println("Model: " + apiRequest.getModel());
+            System.out.println("==================================================");
 
             HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(apiRequest, headers);
 

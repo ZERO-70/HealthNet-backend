@@ -6,6 +6,8 @@ import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Model.ApiQueryRequest;
 import com.server.HealthNet.Model.ApiQueryResponse;
 import com.server.HealthNet.Model.QueryRequest;
+import com.server.HealthNet.Model.ModelType;
+import com.server.HealthNet.Model.ModelType;
 import com.server.HealthNet.Service.ChatService;
 import com.server.HealthNet.Service.UserAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,30 +112,35 @@ public class ChatController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
         return chatService.getChatsByPersonId(user.getPersonId());
-    } // Process a query and get response from external API
+    } // Process a query and get response from external API @PostMapping("/query")
 
-    @PostMapping("/query")
     public ResponseEntity<ApiQueryResponse> processQuery(@RequestBody QueryRequest queryRequest) {
+        // Print the query request for debugging
+        System.out.println("Received QueryRequest: " + queryRequest.getQuery());
+
         // Check if the user is authenticated
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // If not authenticated or anonymous authentication, process as unauthenticated
         if (authentication == null ||
-                "anonymousUser".equals(authentication.getPrincipal()) ||
+                "anonymousUser".equals(String.valueOf(authentication.getPrincipal())) ||
                 !authentication.isAuthenticated()) {
 
             // Process without authentication - no database storage
-            ApiQueryResponse response = chatService.processUnauthenticatedQuery(queryRequest.getQuery());
+            ApiQueryResponse response = chatService.processUnauthenticatedQuery(queryRequest.getQuery(),
+                    queryRequest.getModel());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
         // Handle authenticated request
         String username = authentication.getName();
-        UserAuthentication user = userAuthService.getUserByUsername(username);
-
-        // Create request object for the external API
+        UserAuthentication user = userAuthService.getUserByUsername(username); // Create request object for the external
+                                                                               // API
         ApiQueryRequest apiRequest = new ApiQueryRequest();
         apiRequest.setQuery(queryRequest.getQuery());
+
+        // Set the model type from the request (will default to FAST if not specified)
+        apiRequest.setModel(queryRequest.getModel());
 
         // Set the role and ID based on the authenticated user's role
         String roleStr = user.getRole().toString();
@@ -147,6 +154,14 @@ public class ChatController {
         } else if (user.getRole() == Role.ADMIN) {
             apiRequest.setDoctor_id(personIdStr); // As per requirements, use "doctor_id" for admin
         }
+
+        // Print the API request object for debugging
+        System.out.println("ApiQueryRequest JSON:");
+        System.out.println("  Patient ID: " + apiRequest.getPatient_id());
+        System.out.println("  Doctor ID: " + apiRequest.getDoctor_id());
+        System.out.println("  Role: " + apiRequest.getRole());
+        System.out.println("  Query: " + apiRequest.getQuery());
+        System.out.println("  Model: " + apiRequest.getModel());
 
         // Process the query through the service
         ApiQueryResponse response = chatService.processQuery(apiRequest, user.getPersonId());
