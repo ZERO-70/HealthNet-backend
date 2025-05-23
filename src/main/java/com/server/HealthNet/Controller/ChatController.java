@@ -7,7 +7,6 @@ import com.server.HealthNet.Model.ApiQueryRequest;
 import com.server.HealthNet.Model.ApiQueryResponse;
 import com.server.HealthNet.Model.QueryRequest;
 import com.server.HealthNet.Model.ModelType;
-import com.server.HealthNet.Model.ModelType;
 import com.server.HealthNet.Service.ChatService;
 import com.server.HealthNet.Service.UserAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,17 +102,17 @@ public class ChatController {
         return res > 0
                 ? new ResponseEntity<>("Chat deleted", HttpStatus.OK)
                 : new ResponseEntity<>("Deletion failed", HttpStatus.BAD_REQUEST);
-    }
-
-    // Get chats for current user
+    }    // Get chats for current user
     @GetMapping("/getmine")
     @PreAuthorize("isAuthenticated()")
     public List<Chat> getMyChats() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication user = userAuthService.getUserByUsername(username);
         return chatService.getChatsByPersonId(user.getPersonId());
-    } // Process a query and get response from external API @PostMapping("/query")
-
+    } 
+    
+    // Process a query and get response from external API 
+    @PostMapping("/query")
     public ResponseEntity<ApiQueryResponse> processQuery(@RequestBody QueryRequest queryRequest) {
         // Print the query request for debugging
         System.out.println("Received QueryRequest: " + queryRequest.getQuery());

@@ -7,7 +7,6 @@ com\server\HealthNet\Controller\PatientController.class
 com\server\HealthNet\Controller\StaffController.class
 com\server\HealthNet\Model\QueryRequest.class
 com\server\HealthNet\Service\PatientService.class
-com\server\HealthNet\Controller\ChatController$1.class
 com\server\HealthNet\SecurityConfig\CorsConfig.class
 com\server\HealthNet\Service\StaffService.class
 com\server\HealthNet\Service\MedicalRecordService.class
@@ -15,6 +14,7 @@ com\server\HealthNet\Model\CustomUserDetails.class
 com\server\HealthNet\Model\Chat.class
 com\server\HealthNet\Service\DepartmentService.class
 com\server\HealthNet\Repository\InventoryRepository.class
+com\server\HealthNet\Model\SubscriptionUpdateRequest.class
 com\server\HealthNet\Controller\DepartmentController.class
 com\server\HealthNet\Repository\MedicalRecordRepository.class
 com\server\HealthNet\Repository\ChatRepository.class
@@ -35,11 +35,10 @@ com\server\HealthNet\Repository\LabResultRepository.class
 com\server\HealthNet\Model\Avalibility.class
 com\server\HealthNet\Repository\DoctorRepository$1.class
 com\server\HealthNet\Repository\SuggestionRepository.class
-com\server\HealthNet\Model\QueryResponse.class
 com\server\HealthNet\Controller\AvalibilityController.class
 com\server\HealthNet\Service\AvalibilityService.class
+com\server\HealthNet\Model\ModelType.class
 com\server\HealthNet\SecurityConfig\SecurityConfig.class
-com\server\HealthNet\Model\AssistantQueryRequest.class
 com\server\HealthNet\Model\Suggestion.class
 com\server\HealthNet\Service\JWTservice.class
 com\server\HealthNet\Repository\StaffRepository$1.class
@@ -51,13 +50,16 @@ com\server\HealthNet\Model\MedicalRecord.class
 com\server\HealthNet\Service\PersonService.class
 com\server\HealthNet\HealthNetApplication.class
 com\server\HealthNet\Service\InventoryService.class
+com\server\HealthNet\Model\ApiQueryRequest.class
 com\server\HealthNet\Repository\DepartmentRepository.class
 com\server\HealthNet\Model\Role.class
+com\server\HealthNet\Model\SubscriptionResponse.class
 com\server\HealthNet\Service\AppointmentService$1.class
 com\server\HealthNet\Controller\MedicalRecordController.class
 com\server\HealthNet\Repository\TreatementRepository.class
 com\server\HealthNet\Repository\UserAuthenticationRepository.class
 com\server\HealthNet\Repository\PatientRepository.class
+com\server\HealthNet\Model\ApiQueryResponse.class
 com\server\HealthNet\Model\Inventory.class
 com\server\HealthNet\Repository\AvalibilityRepository$AvalibilityRowMapper.class
 com\server\HealthNet\Model\UserAuthentication.class
@@ -74,5 +76,6 @@ com\server\HealthNet\Repository\PersonRepository.class
 com\server\HealthNet\Model\Staff.class
 com\server\HealthNet\Controller\SuggestionController.class
 com\server\HealthNet\Model\MedicalRecordAudit.class
+com\server\HealthNet\Model\Subscription.class
 com\server\HealthNet\Controller\AppointmentController.class
 com\server\HealthNet\Repository\AppointmentRepository.class
