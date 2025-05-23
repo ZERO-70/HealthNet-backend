@@ -1,6 +1,7 @@
 package com.server.HealthNet.Repository;
 
 import com.server.HealthNet.Model.Role;
+import com.server.HealthNet.Model.Subscription;
 import com.server.HealthNet.Model.UserAuthentication;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,13 +22,14 @@ public class UserAuthenticationRepository {
     }
 
     public int save(UserAuthentication userAuthentication) {
-        String sql = "INSERT INTO user_authentication (username, password, role, person_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO user_authentication (username, password, role, person_id, subscription) VALUES (?, ?, ?, ?, ?)";
         return jdbcTemplate.update(
                 sql,
                 userAuthentication.getUsername(),
                 userAuthentication.getPassword(),
                 userAuthentication.getRole().name(),
-                userAuthentication.getPersonId());
+                userAuthentication.getPersonId(),
+                userAuthentication.getSubscription().name());
     }
 
     public UserAuthentication findByUsername(String username) {
@@ -45,13 +47,19 @@ public class UserAuthenticationRepository {
     }
 
     public int update(UserAuthentication userAuthentication) {
-        String sql = "UPDATE user_authentication SET password = ?, role = ?, person_id = ? WHERE username = ?";
+        String sql = "UPDATE user_authentication SET password = ?, role = ?, person_id = ?, subscription = ? WHERE username = ?";
         return jdbcTemplate.update(
                 sql,
                 userAuthentication.getPassword(),
                 userAuthentication.getRole().name(),
                 userAuthentication.getPersonId(),
+                userAuthentication.getSubscription().name(),
                 userAuthentication.getUsername());
+    }
+
+    public int updateSubscription(String username, String subscription) {
+        String sql = "UPDATE user_authentication SET subscription = ? WHERE username = ?";
+        return jdbcTemplate.update(sql, subscription, username);
     }
 
     public int deleteByUsername(String username) {
@@ -74,6 +82,9 @@ public class UserAuthenticationRepository {
 
             String roleStr = rs.getString("role");
             user.setRole(Role.valueOf(roleStr.toUpperCase()));
+
+            String subscriptionStr = rs.getString("subscription");
+            user.setSubscription(Subscription.valueOf(subscriptionStr.toUpperCase()));
 
             return user;
         }

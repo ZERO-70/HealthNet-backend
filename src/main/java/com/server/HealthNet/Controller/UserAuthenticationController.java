@@ -1,6 +1,9 @@
 package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Role;
+import com.server.HealthNet.Model.Subscription;
+import com.server.HealthNet.Model.SubscriptionResponse;
+import com.server.HealthNet.Model.SubscriptionUpdateRequest;
 import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Service.UserAuthenticationService;
 
@@ -118,5 +121,115 @@ public class UserAuthenticationController {
     public ResponseEntity<Boolean> doesUsernameExist(@PathVariable String username) {
         boolean exists = userAuthenticationService.doesUsernameExist(username);
         return ResponseEntity.ok(exists);
+    }
+
+    @PutMapping("/subscription")
+    public ResponseEntity<Void> updateSubscription(@RequestBody SubscriptionUpdateRequest request) {
+        // Verify the authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
+        String username = authentication.getName();
+        UserAuthentication userAuth = userAuthenticationService.getUserByUsername(username);
+        if (userAuth == null) {
+            return ResponseEntity.status(404).build(); // Not found
+        }
+
+        // Update the subscription
+        try {
+            Subscription newSubscription = Subscription.valueOf(request.getSubscription());
+
+            // If user is ADMIN or STAFF, subscription should always be PLUS
+            if ((userAuth.getRole() == Role.ADMIN || userAuth.getRole() == Role.STAFF)
+                    && newSubscription != Subscription.PLUS) {
+                return ResponseEntity.status(400).build(); // Bad request - Admin and Staff must have PLUS
+            }
+
+            userAuthenticationService.updateUserSubscription(username, newSubscription);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).build(); // Bad request - invalid subscription type
+        }
+    }
+
+    @GetMapping("/subscription")
+    public ResponseEntity<SubscriptionResponse> getSubscription() {
+        // Verify the authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
+        String username = authentication.getName();
+        UserAuthentication userAuth = userAuthenticationService.getUserByUsername(username);
+        if (userAuth == null) {
+            return ResponseEntity.status(404).build(); // Not found
+        }
+
+        // Return the subscription
+        SubscriptionResponse response = new SubscriptionResponse(userAuth.getSubscription().name());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/subscription/token")
+    public ResponseEntity<Void> updateSubscriptionWithToken(@RequestHeader("Authorization") String tokenHeader,
+            @RequestBody SubscriptionUpdateRequest request) {
+        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
+        String token = tokenHeader.substring(7); // Remove "Bearer " prefix
+        String username = userAuthenticationService.extractUsernameFromToken(token);
+
+        if (username == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
+        UserAuthentication userAuth = userAuthenticationService.getUserByUsername(username);
+        if (userAuth == null) {
+            return ResponseEntity.status(404).build(); // Not found
+        }
+
+        // Update the subscription
+        try {
+            Subscription newSubscription = Subscription.valueOf(request.getSubscription());
+
+            // If user is ADMIN or STAFF, subscription should always be PLUS
+            if ((userAuth.getRole() == Role.ADMIN || userAuth.getRole() == Role.STAFF)
+                    && newSubscription != Subscription.PLUS) {
+                return ResponseEntity.status(400).build(); // Bad request - Admin and Staff must have PLUS
+            }
+
+            userAuthenticationService.updateUserSubscription(username, newSubscription);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).build(); // Bad request - invalid subscription type
+        }
+    }
+
+    @GetMapping("/subscription/token")
+    public ResponseEntity<SubscriptionResponse> getSubscriptionWithToken(
+            @RequestHeader("Authorization") String tokenHeader) {
+        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
+        String token = tokenHeader.substring(7); // Remove "Bearer " prefix
+        String username = userAuthenticationService.extractUsernameFromToken(token);
+
+        if (username == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
+        UserAuthentication userAuth = userAuthenticationService.getUserByUsername(username);
+        if (userAuth == null) {
+            return ResponseEntity.status(404).build(); // Not found
+        }
+
+        // Return the subscription
+        SubscriptionResponse response = new SubscriptionResponse(userAuth.getSubscription().name());
+        return ResponseEntity.ok(response);
     }
 }
