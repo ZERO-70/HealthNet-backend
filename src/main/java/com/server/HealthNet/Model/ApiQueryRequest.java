@@ -1,5 +1,8 @@
 package com.server.HealthNet.Model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiQueryRequest {
     private String patient_id;
     private String doctor_id;
