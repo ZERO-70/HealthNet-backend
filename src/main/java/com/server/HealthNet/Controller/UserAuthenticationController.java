@@ -27,7 +27,7 @@ public class UserAuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> createUser(@RequestBody UserAuthentication userAuthentication) {
+    public ResponseEntity<String> createUser(@RequestBody UserAuthentication userAuthentication) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
@@ -36,13 +36,20 @@ public class UserAuthenticationController {
 
             if (userAuthentication.getRole() == Role.STAFF) {
                 if (rAuthentication == null || rAuthentication.getRole() != Role.ADMIN) {
-                    return ResponseEntity.status(403).build();
+                    return ResponseEntity.status(403).body("Access denied: Only admins can create staff accounts");
                 }
             }
         }
 
-        userAuthenticationService.createUser(userAuthentication);
-        return ResponseEntity.status(201).build();
+        int result = userAuthenticationService.createUser(userAuthentication);
+        
+        if (result == -1) {
+            return ResponseEntity.status(409).body("Username already exists. Please choose a different username.");
+        } else if (result > 0) {
+            return ResponseEntity.status(201).body("User registered successfully");
+        } else {
+            return ResponseEntity.status(500).body("Failed to register user");
+        }
     }
 
     @GetMapping("/{username}")
