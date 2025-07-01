@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,9 +42,43 @@ public class AppointmentController {
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<String> createAppointment(@RequestBody Appointment appointment) {
+        // Log the complete appointment request for debugging
+        System.out.println("=== APPOINTMENT CREATION REQUEST ===");
+        System.out.println("Appointment Object: " + appointment.toString());
+        System.out.println("Patient ID from request: " + appointment.getPatient_id());
+        System.out.println("Doctor ID: " + appointment.getDoctor_id());
+        System.out.println("Appointment Date: " + appointment.getDate());
+        System.out.println("Start Time: " + appointment.getStartTime());
+        System.out.println("End Time: " + appointment.getEndTime());
+        System.out.println("Is Pending: " + appointment.isIs_pending());
+        System.out.println("Is Approved: " + appointment.isIs_approved());
+        System.out.println("===================================");
+        
+        // Log authentication details
+        System.out.println("=== AUTHENTICATION INFO ===");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authentication object: " + auth);
+        System.out.println("Is authenticated: " + (auth != null ? auth.isAuthenticated() : "null"));
+        System.out.println("Principal: " + (auth != null ? auth.getPrincipal() : "null"));
+        System.out.println("Authorities: " + (auth != null ? auth.getAuthorities() : "null"));
+        
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        System.out.println("Extracted username: " + username);
+        
         UserAuthentication userAuthentication = userAuthenticationService.getUserByUsername(username);
+        System.out.println("User from database: " + (userAuthentication != null ? userAuthentication.toString() : "null"));
+        System.out.println("User role: " + (userAuthentication != null ? userAuthentication.getRole() : "null"));
+        System.out.println("User person ID: " + (userAuthentication != null ? userAuthentication.getPersonId() : "null"));
+        System.out.println("===========================");
+        
+        if (userAuthentication == null) {
+            System.out.println("ERROR: User not found in database for username: " + username);
+            return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
+        }
+        
         if (appointment.getPatient_id() != userAuthentication.getPersonId()) {
+            System.out.println("ERROR: Patient ID mismatch - Request: " + appointment.getPatient_id() + 
+                             ", User: " + userAuthentication.getPersonId());
             return new ResponseEntity<>("Your ID does not match with requested appointment", HttpStatus.FORBIDDEN);
         }
 

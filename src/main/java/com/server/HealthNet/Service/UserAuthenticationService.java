@@ -32,8 +32,19 @@ public class UserAuthenticationService {
     }
 
     public int createUser(UserAuthentication userAuthentication) {
+        // Log the complete request for debugging
+        System.out.println("=== CREATE USER REQUEST ===");
+        System.out.println("Username: " + userAuthentication.getUsername());
+        System.out.println("Password: " + (userAuthentication.getPassword() != null ? "[PROVIDED]" : "[NULL]"));
+        System.out.println("Role: " + userAuthentication.getRole());
+        System.out.println("Person ID: " + userAuthentication.getPersonId());
+        System.out.println("Subscription: " + userAuthentication.getSubscription());
+        System.out.println("Full Object: " + userAuthentication.toString());
+        System.out.println("=========================");
+        
         // Check if username already exists
         if (doesUsernameExist(userAuthentication.getUsername())) {
+            System.out.println("ERROR: Username already exists - " + userAuthentication.getUsername());
             return -1; // Return -1 to indicate username already exists
         }
 
@@ -92,8 +103,8 @@ public class UserAuthenticationService {
     }
 
     public boolean doesUsernameExist(String username) {
-        List<String> usernames = userAuthenticationRepository.getAllUsernames();
-        return usernames.contains(username);
+        UserAuthentication user = userAuthenticationRepository.findByUsername(username);
+        return user != null;
     }
 
     public String extractUsernameFromToken(String token) {
