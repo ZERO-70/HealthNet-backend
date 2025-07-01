@@ -28,6 +28,15 @@ public class UserAuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<String> createUser(@RequestBody UserAuthentication userAuthentication) {
+        // Log the incoming request for debugging
+        System.out.println("=== REGISTER REQUEST RECEIVED ===");
+        System.out.println("Request Body - Username: " + userAuthentication.getUsername());
+        System.out.println("Request Body - Role: " + userAuthentication.getRole());
+        System.out.println("Request Body - Person ID: " + userAuthentication.getPersonId());
+        System.out.println("Request Body - Subscription: " + userAuthentication.getSubscription());
+        System.out.println("Request Body - Password provided: " + (userAuthentication.getPassword() != null && !userAuthentication.getPassword().isEmpty()));
+        System.out.println("================================");
+        
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
@@ -36,6 +45,7 @@ public class UserAuthenticationController {
 
             if (userAuthentication.getRole() == Role.STAFF) {
                 if (rAuthentication == null || rAuthentication.getRole() != Role.ADMIN) {
+                    System.out.println("ACCESS DENIED: Non-admin trying to create staff account");
                     return ResponseEntity.status(403).body("Access denied: Only admins can create staff accounts");
                 }
             }
@@ -44,10 +54,13 @@ public class UserAuthenticationController {
         int result = userAuthenticationService.createUser(userAuthentication);
         
         if (result == -1) {
+            System.out.println("REGISTRATION FAILED: Username already exists");
             return ResponseEntity.status(409).body("Username already exists. Please choose a different username.");
         } else if (result > 0) {
+            System.out.println("REGISTRATION SUCCESSFUL: User created with ID " + result);
             return ResponseEntity.status(201).body("User registered successfully");
         } else {
+            System.out.println("REGISTRATION FAILED: Database error, result = " + result);
             return ResponseEntity.status(500).body("Failed to register user");
         }
     }
