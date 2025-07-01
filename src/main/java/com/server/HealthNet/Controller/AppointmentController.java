@@ -76,8 +76,16 @@ public class AppointmentController {
             return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
         }
         
-        if (appointment.getPatient_id() != userAuthentication.getPersonId()) {
-            System.out.println("ERROR: Patient ID mismatch - Request: " + appointment.getPatient_id() + 
+        // Debug the comparison values and types
+        System.out.println("=== PATIENT ID COMPARISON DEBUG ===");
+        System.out.println("Request Patient ID: " + appointment.getPatient_id() + " (Type: " + (appointment.getPatient_id() != null ? appointment.getPatient_id().getClass().getSimpleName() : "null") + ")");
+        System.out.println("User Person ID: " + userAuthentication.getPersonId() + " (Type: " + (userAuthentication.getPersonId() != null ? userAuthentication.getPersonId().getClass().getSimpleName() : "null") + ")");
+        System.out.println("Are they equal using equals(): " + (appointment.getPatient_id() != null && appointment.getPatient_id().equals(userAuthentication.getPersonId())));
+        System.out.println("Are they equal using !=: " + (appointment.getPatient_id() != userAuthentication.getPersonId()));
+        System.out.println("===================================");
+        
+        if (!appointment.getPatient_id().equals(userAuthentication.getPersonId())) {
+            System.out.println("ERROR:       Patient ID mismatch - Request: " + appointment.getPatient_id() + 
                              ", User: " + userAuthentication.getPersonId());
             return new ResponseEntity<>("Your ID does not match with requested appointment", HttpStatus.FORBIDDEN);
         }
