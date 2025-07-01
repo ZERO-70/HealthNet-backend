@@ -32,6 +32,11 @@ public class UserAuthenticationService {
     }
 
     public int createUser(UserAuthentication userAuthentication) {
+        // Check if username already exists
+        if (doesUsernameExist(userAuthentication.getUsername())) {
+            return -1; // Return -1 to indicate username already exists
+        }
+
         // Encode the password
         userAuthentication.setPassword(bcrypt.encode(userAuthentication.getPassword()));
 
