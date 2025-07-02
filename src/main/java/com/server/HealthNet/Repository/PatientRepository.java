@@ -67,13 +67,55 @@ public class PatientRepository {
     }
 
     public int deletePatientById(Long patientId) {
-        String deletePatientSql = "DELETE FROM patient WHERE patient_id = ?";
-        int rowsAffected = jdbcTemplate.update(deletePatientSql, patientId);
+        try {
+            // Delete related records first to avoid foreign key constraint violations
+            
+            // First, get all medical record IDs for this patient
+            String getRecordIdsSql = "SELECT record_id FROM medical_records WHERE patient_id = ?";
+            List<Long> recordIds = jdbcTemplate.queryForList(getRecordIdsSql, Long.class, patientId);
+            
+            // Delete medical record attachments for each record
+            if (!recordIds.isEmpty()) {
+                String placeholders = recordIds.stream().map(id -> "?").collect(java.util.stream.Collectors.joining(","));
+                String deleteMedicalRecordAttachmentsSql = 
+                    "DELETE FROM medical_record_attachments WHERE record_id IN (" + placeholders + ")";
+                jdbcTemplate.update(deleteMedicalRecordAttachmentsSql, recordIds.toArray());
+                
+                // Delete medical record lab results for each record
+                String deleteMedicalRecordLabResultsSql = 
+                    "DELETE FROM medical_record_lab_results WHERE record_id IN (" + placeholders + ")";
+                jdbcTemplate.update(deleteMedicalRecordLabResultsSql, recordIds.toArray());
+                
+                // Delete medical record audit trails for each record
+                String deleteMedicalRecordAuditSql = 
+                    "DELETE FROM medical_record_audit WHERE record_id IN (" + placeholders + ")";
+                jdbcTemplate.update(deleteMedicalRecordAuditSql, recordIds.toArray());
+            }
+            
+            // Delete medical records for this patient
+            String deleteMedicalRecordsSql = "DELETE FROM medical_records WHERE patient_id = ?";
+            jdbcTemplate.update(deleteMedicalRecordsSql, patientId);
+            
+            // Delete appointments for this patient
+            String deleteAppointmentsSql = "DELETE FROM appointments WHERE patient_id = ?";
+            jdbcTemplate.update(deleteAppointmentsSql, patientId);
+            
+            // Delete any other patient-related records if they exist
+            // Add more delete statements here for other tables that reference patient_id
+            
+            // Finally, delete the patient record
+            String deletePatientSql = "DELETE FROM patient WHERE patient_id = ?";
+            int rowsAffected = jdbcTemplate.update(deletePatientSql, patientId);
 
-        String deletePersonSql = "DELETE FROM person WHERE person_id = ?";
-        rowsAffected += jdbcTemplate.update(deletePersonSql, patientId);
+            // Delete the person record
+            String deletePersonSql = "DELETE FROM person WHERE person_id = ?";
+            rowsAffected += jdbcTemplate.update(deletePersonSql, patientId);
 
-        return rowsAffected;
+            return rowsAffected;
+        } catch (Exception e) {
+            System.err.println("Error deleting patient with ID: " + patientId + ". Error: " + e.getMessage());
+            throw new RuntimeException("Failed to delete patient: " + e.getMessage(), e);
+        }
     }
 
     public int updatePatient(Patient patient) {

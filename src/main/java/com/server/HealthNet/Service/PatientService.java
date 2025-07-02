@@ -4,6 +4,7 @@ import com.server.HealthNet.Model.Patient;
 import com.server.HealthNet.Repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ public class PatientService {
         return patientRepository.findAllPatients();
     }
 
+    @Transactional
     public int deletePatientById(Long patientId) {
         return patientRepository.deletePatientById(patientId);
     }
