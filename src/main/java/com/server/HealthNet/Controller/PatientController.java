@@ -13,7 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -100,23 +102,39 @@ public class PatientController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
-    public ResponseEntity<String> deletePatientById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deletePatientById(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuthentication = userAuthenticationService.getUserByUsername(username);
         if (userAuthentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            response.put("success", false);
+            response.put("message", "Authentication error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-        // i hope this works
+        
+        // Authorization check: patient can only delete their own account, admin can delete any
         if (!userAuthentication.getPersonId().equals(id) && userAuthentication.getRole() != Role.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            response.put("success", false);
+            response.put("message", "You can only delete your own account");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
-        int rowsAffected = patientService.deletePatientById(id);
-        if (rowsAffected > 0) {
-            return new ResponseEntity<>("Patient deleted successfully", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Patient deletion failed", HttpStatus.NOT_FOUND);
+        try {
+            int rowsAffected = patientService.deletePatientById(id);
+            if (rowsAffected > 0) {
+                response.put("success", true);
+                response.put("message", "Patient deleted successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Patient deletion failed - patient not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Patient deletion failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }
