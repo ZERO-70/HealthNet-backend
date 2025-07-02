@@ -41,6 +41,14 @@ public class SuggestionRepository {
         return jdbcTemplate.query(sql, this::mapRowToSuggestion, personId);
     }
 
+    /**
+     * Find recent suggestions for a specific person within the specified minutes
+     */
+    public List<Suggestion> findRecentByPersonId(Long personId, int withinMinutes) {
+        String sql = "SELECT * FROM suggestion WHERE person_id = ? AND created_at >= NOW() - INTERVAL ? MINUTE ORDER BY created_at DESC";
+        return jdbcTemplate.query(sql, this::mapRowToSuggestion, personId, withinMinutes);
+    }
+
     public int save(Suggestion suggestion) {
         String sql = "INSERT INTO suggestion (person_id, suggestion_text) VALUES (?, ?)";
         return jdbcTemplate.update(sql,

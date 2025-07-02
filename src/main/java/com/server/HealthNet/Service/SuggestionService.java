@@ -45,6 +45,13 @@ public class SuggestionService {
         return suggestionRepository.findByPersonId(personId);
     }
 
+    /**
+     * Get recent suggestions for a specific person within the specified minutes
+     */
+    public List<Suggestion> getRecentSuggestionsByPersonId(Long personId, int withinMinutes) {
+        return suggestionRepository.findRecentByPersonId(personId, withinMinutes);
+    }
+
     public int createSuggestion(Suggestion suggestion) {
         return suggestionRepository.save(suggestion);
     }
@@ -80,7 +87,19 @@ public class SuggestionService {
         HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
         Suggestion suggestion = new Suggestion();
         try {
+            // Console logging: Print the request data being sent to AI backend
+            System.out.println("=== AI BACKEND REQUEST ===");
+            System.out.println("API URL: " + apiUrl);
+            System.out.println("Request Headers: " + headers);
+            System.out.println("Request Body: " + requestBody);
+            System.out.println("============================");
+
             Map<String, String> response = restTemplate.postForObject(apiUrl, request, Map.class);
+
+            // Console logging: Print the response received from AI backend
+            System.out.println("=== AI BACKEND RESPONSE ===");
+            System.out.println("Response: " + response);
+            System.out.println("============================");
 
             if (response != null && response.containsKey("advice")) {
                 String adviceText = response.get("advice");
@@ -133,9 +152,21 @@ public class SuggestionService {
                     // Create request entity with suggestion object
                     HttpEntity<Suggestion> maiRequest = new HttpEntity<>(suggestion, maiHeaders);
 
+                    // Console logging: Print the request data being sent to MAI API
+                    System.out.println("=== MAI API REQUEST ===");
+                    System.out.println("API URL: http://159.89.49.64:7898/api/email");
+                    System.out.println("Request Headers: " + maiHeaders);
+                    System.out.println("Request Body: " + suggestion);
+                    System.out.println("========================");
+
                     // Send POST request to MAI endpoint
                     String response = restTemplate.postForObject("http://159.89.49.64:7898/api/email", maiRequest,
                             String.class);
+
+                    // Console logging: Print the response received from MAI API
+                    System.out.println("=== MAI API RESPONSE ===");
+                    System.out.println("Response: " + response);
+                    System.out.println("=========================");
 
                     System.out.println(
                             "Successfully sent suggestion for patient ID: " + patientId + ", Response: " + response);
