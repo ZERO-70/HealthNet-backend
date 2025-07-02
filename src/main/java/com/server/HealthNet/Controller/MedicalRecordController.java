@@ -104,6 +104,8 @@ public class MedicalRecordController {
     @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<Map<String, Object>> updateMedicalRecord(@PathVariable Long id,
             @RequestBody MedicalRecord record) {
+                System.out.println("*********************Updating medical record with ID: " + id
+                +"************************");
         Map<String, Object> response = new HashMap<>();
         UserAuthentication user = getCurrentUser();
 
@@ -136,6 +138,9 @@ public class MedicalRecordController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<Map<String, Object>> deleteMedicalRecord(@PathVariable Long id) {
+
+                System.out.println("*********************Deleting medical record with ID: " + id
+                +"************************");
         Map<String, Object> response = new HashMap<>();
         UserAuthentication user = getCurrentUser();
 

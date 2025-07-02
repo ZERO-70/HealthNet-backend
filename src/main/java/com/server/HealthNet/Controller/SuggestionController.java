@@ -13,9 +13,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/suggestion")
@@ -140,5 +142,70 @@ public class SuggestionController {
     public ResponseEntity<String> forceUpdateSuggestions() {
         suggestionService.fetchDailySuggestions();
         return new ResponseEntity<>("Suggestions updated successfully", HttpStatus.OK);
+    }
+
+    // Generate advice for current patient only (PATIENT role only)
+    @PostMapping("/generate")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> generateAdviceForCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserAuthentication user = userAuthService.getUserByUsername(username);
+        
+        // Only allow patients to generate advice
+        if (!user.getRole().equals(Role.PATIENT)) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Only patients can generate medical advice");
+            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        }
+        
+        // Delete only this patient's existing suggestions before generating new ones
+        List<Suggestion> existingSuggestions = suggestionService.getSuggestionsByPersonId(user.getPersonId());
+        for (Suggestion suggestion : existingSuggestions) {
+            suggestionService.deleteSuggestion(suggestion.getSuggestionId());
+        }
+        
+        // Start async advice generation for this patient only
+        CompletableFuture.supplyAsync(() -> {
+            return suggestionService.fetchAndSaveMedicalAdvice(user.getPersonId());
+        });
+        
+        // Return immediate response with status
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "generating");
+        response.put("message", "Medical advice generation started for your profile");
+        response.put("patientId", user.getPersonId());
+        response.put("timestamp", LocalDateTime.now());
+        
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+    }
+
+    // Check generation status for current patient
+    @GetMapping("/generation-status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> checkGenerationStatus() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserAuthentication user = userAuthService.getUserByUsername(username);
+        
+        // Only allow patients to check status
+        if (!user.getRole().equals(Role.PATIENT)) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Only patients can check advice generation status");
+            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        }
+        
+        // Get recent suggestions for this patient (within last 10 minutes)
+        List<Suggestion> recentSuggestions = suggestionService.getRecentSuggestionsByPersonId(user.getPersonId(), 10);
+        
+        Map<String, Object> response = new HashMap<>();
+        if (!recentSuggestions.isEmpty()) {
+            response.put("status", "completed");
+            response.put("suggestion", recentSuggestions.get(0));
+            response.put("message", "Your personalized medical advice is ready!");
+        } else {
+            response.put("status", "generating");
+            response.put("message", "AI is analyzing your medical data to generate personalized advice...");
+        }
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
