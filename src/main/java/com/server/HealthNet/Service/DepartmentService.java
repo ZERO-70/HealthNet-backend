@@ -1,10 +1,12 @@
 package com.server.HealthNet.Service;
 
 import com.server.HealthNet.Model.Department;
+import com.server.HealthNet.Model.DepartmentSummaryDTO;
 import com.server.HealthNet.Repository.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DepartmentService {
@@ -30,5 +32,15 @@ public class DepartmentService {
 
     public int deleteDepartment(Long id) {
         return departmentRepository.deleteById(id);
+    }
+
+    /**
+     * Get all department summaries (ID and name only)
+     * Lightweight method for dropdowns and selections
+     */
+    public List<DepartmentSummaryDTO> getAllDepartmentSummaries() {
+        return departmentRepository.findAll().stream()
+                .map(dept -> new DepartmentSummaryDTO(dept.getDepartment_id(), dept.getName()))
+                .collect(Collectors.toList());
     }
 }

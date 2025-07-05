@@ -1,6 +1,7 @@
 package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Department;
+import com.server.HealthNet.Model.DepartmentSummaryDTO;
 import com.server.HealthNet.Service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,17 @@ public class DepartmentController {
     @PreAuthorize("hasRole('STAFF') or hasRole('ADMIN')")
     public Department getDepartmentById(@PathVariable Long id) {
         return departmentService.getDepartmentById(id);
+    }
+
+    /**
+     * Get all department summaries (ID and name only)
+     * Lightweight endpoint for dropdowns and selections
+     */
+    @GetMapping("/summaries")
+    @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<List<DepartmentSummaryDTO>> getAllDepartmentSummaries() {
+        List<DepartmentSummaryDTO> summaries = departmentService.getAllDepartmentSummaries();
+        return ResponseEntity.ok(summaries);
     }
 
     @PostMapping
