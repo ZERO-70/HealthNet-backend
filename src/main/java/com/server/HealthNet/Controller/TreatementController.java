@@ -2,6 +2,7 @@ package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.Treatement;
+import com.server.HealthNet.Model.TreatmentSummaryDTO;
 import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Service.TreatementService;
 import com.server.HealthNet.Service.UserAuthenticationService;
@@ -35,6 +36,17 @@ public class TreatementController {
     @GetMapping("/{id}")
     public Treatement getTreatmentById(@PathVariable Long id) {
         return treatmentService.getTreatmentById(id);
+    }
+
+    /**
+     * Get all treatment summaries (ID and name only)
+     * Lightweight endpoint for dropdowns and selections
+     */
+    @GetMapping("/summaries")
+    @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<List<TreatmentSummaryDTO>> getAllTreatmentSummaries() {
+        List<TreatmentSummaryDTO> summaries = treatmentService.getAllTreatmentSummaries();
+        return ResponseEntity.ok(summaries);
     }
 
     @PostMapping
