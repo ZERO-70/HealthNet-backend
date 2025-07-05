@@ -2,7 +2,6 @@ package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Doctor;
 import com.server.HealthNet.Model.DoctorSummaryDTO;
-import com.server.HealthNet.Model.Patient;
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Service.DoctorService;
@@ -16,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -35,6 +33,29 @@ public class DoctorController {
 
     @PostMapping
     public ResponseEntity<Long> addDoctor(@RequestBody Doctor doctor) {
+        // Validate required fields
+        if (doctor.getName() == null || doctor.getName().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        if (doctor.getGender() == null || doctor.getGender().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        if (doctor.getAge() == null || doctor.getAge() <= 0 || doctor.getAge() > 120) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        if (doctor.getBirthdate() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        if (doctor.getContact_info() == null || doctor.getContact_info().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        if (doctor.getAddress() == null || doctor.getAddress().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        if (doctor.getSpecialization() == null || doctor.getSpecialization().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(-1L);
+        }
+        
         Long result = doctorService.saveDoctor(doctor);
         if (result > 0) {
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -91,7 +112,7 @@ public class DoctorController {
     public ResponseEntity<String> updateDoctor(@RequestBody Doctor doctor) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuthentication = userAuthenticationService.getUserByUsername(username);
-        if (userAuthentication.getPersonId() != doctor.getId()) {
+        if (!userAuthentication.getPersonId().equals(doctor.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not validated");
         }
         int result = doctorService.updateDoctor(doctor);
