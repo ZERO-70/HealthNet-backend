@@ -1,6 +1,7 @@
 package com.server.HealthNet.Service;
 
 import com.server.HealthNet.Model.Appointment;
+import com.server.HealthNet.Model.AppointmentWithDetails;
 import com.server.HealthNet.Model.Avalibility;
 import com.server.HealthNet.Repository.AppointmentRepository;
 import com.server.HealthNet.Repository.AvalibilityRepository;
@@ -111,5 +112,13 @@ public class AppointmentService {
             return appointmentRepository.update(appointment);
         }
         return 0; // Return 0 if appointment not found
+    }
+
+    /**
+     * Optimized method to get all appointments with patient and doctor details
+     * This method fetches all data in a single query to improve performance
+     */
+    public List<AppointmentWithDetails> getAllAppointmentsWithDetails() {
+        return appointmentRepository.findAllWithDetails();
     }
 }

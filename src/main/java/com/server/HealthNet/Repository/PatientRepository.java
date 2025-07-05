@@ -1,6 +1,7 @@
 package com.server.HealthNet.Repository;
 
 import com.server.HealthNet.Model.Patient;
+import com.server.HealthNet.Model.PatientWithDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -177,5 +179,103 @@ public class PatientRepository {
         } else {
             return 0L;
         }
+    }
+
+    // Map ResultSet to PatientWithDetails object
+    private PatientWithDetails mapRowToPatientWithDetails(ResultSet rs, int rowNum) throws SQLException {
+        PatientWithDetails patient = new PatientWithDetails();
+        patient.setPatient_id(rs.getLong("patient_id"));
+        patient.setName(rs.getString("name"));
+        patient.setGender(rs.getString("gender"));
+        patient.setAge(rs.getInt("age"));
+        patient.setContact_info(rs.getString("contact_info"));
+        patient.setAddress(rs.getString("address"));
+        patient.setWeight(rs.getString("weight"));
+        patient.setHeight(rs.getString("height"));
+        
+        // Additional details
+        patient.setTotal_appointments(rs.getInt("total_appointments"));
+        patient.setPending_appointments(rs.getInt("pending_appointments"));
+        patient.setApproved_appointments(rs.getInt("approved_appointments"));
+        patient.setLast_appointment_date(rs.getObject("last_appointment_date", LocalDate.class));
+        patient.setTotal_medical_records(rs.getInt("total_medical_records"));
+        patient.setLast_record_date(rs.getObject("last_record_date", LocalDate.class));
+        patient.setLast_diagnosis(rs.getString("last_diagnosis"));
+        patient.setEmergency_contact(rs.getString("emergency_contact"));
+        patient.setAllergies(rs.getString("allergies"));
+        patient.setExisting_conditions(rs.getString("existing_conditions"));
+        
+        return patient;
+    }
+
+    /**
+     * Optimized method to fetch all patients with comprehensive details in a single query
+     * This eliminates the N+1 query problem by using JOINs and subqueries
+     * Used by staff portal for faster patient loading with detailed information
+     */
+    public List<PatientWithDetails> findAllPatientsWithDetails() {
+        String sql = """
+            SELECT 
+                pat.patient_id,
+                p.name,
+                p.gender,
+                p.age,
+                p.contact_info,
+                p.address,
+                pat.weight,
+                pat.height,
+                
+                -- Appointment statistics
+                COALESCE(apt_stats.total_appointments, 0) AS total_appointments,
+                COALESCE(apt_stats.pending_appointments, 0) AS pending_appointments,
+                COALESCE(apt_stats.approved_appointments, 0) AS approved_appointments,
+                apt_stats.last_appointment_date,
+                
+                -- Medical record statistics
+                COALESCE(mr_stats.total_medical_records, 0) AS total_medical_records,
+                mr_stats.last_record_date,
+                mr_stats.last_diagnosis,
+                
+                -- Additional patient info (these might be null if not in your schema)
+                NULL AS emergency_contact,
+                NULL AS allergies,
+                NULL AS existing_conditions
+                
+            FROM patient pat
+            INNER JOIN person p ON pat.patient_id = p.person_id
+            
+            -- Appointment statistics subquery
+            LEFT JOIN (
+                SELECT 
+                    patient_id,
+                    COUNT(*) AS total_appointments,
+                    SUM(CASE WHEN is_pending = TRUE THEN 1 ELSE 0 END) AS pending_appointments,
+                    SUM(CASE WHEN is_approved = TRUE THEN 1 ELSE 0 END) AS approved_appointments,
+                    MAX(date) AS last_appointment_date
+                FROM appointments
+                GROUP BY patient_id
+            ) apt_stats ON pat.patient_id = apt_stats.patient_id
+            
+            -- Medical records statistics subquery
+            LEFT JOIN (
+                SELECT 
+                    patient_id,
+                    COUNT(*) AS total_medical_records,
+                    MAX(record_date) AS last_record_date,
+                    -- Get the most recent diagnosis
+                    (SELECT diagnosis 
+                     FROM medical_records mr2 
+                     WHERE mr2.patient_id = mr1.patient_id 
+                       AND mr2.diagnosis IS NOT NULL 
+                       AND mr2.diagnosis != ''
+                     ORDER BY mr2.record_date DESC 
+                     LIMIT 1) AS last_diagnosis
+                FROM medical_records mr1
+                GROUP BY patient_id
+            ) mr_stats ON pat.patient_id = mr_stats.patient_id
+            
+            ORDER BY p.name ASC
+            """;
+        return jdbcTemplate.query(sql, this::mapRowToPatientWithDetails);
     }
 }

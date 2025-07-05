@@ -1,6 +1,7 @@
 package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Appointment;
+import com.server.HealthNet.Model.AppointmentWithDetails;
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Service.AppointmentService;
@@ -212,6 +213,25 @@ public class AppointmentController {
         return result > 0
                 ? new ResponseEntity<>("Appointment marked as not pending successfully", HttpStatus.OK)
                 : new ResponseEntity<>("Failed to mark appointment as not pending", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Optimized endpoint to get all appointments with patient and doctor details
+     * This endpoint reduces the number of database queries from N+1 to 1
+     * Used by staff portal for faster appointment loading
+     */
+    @GetMapping("/with-details")
+    @PreAuthorize("hasRole('STAFF') or hasRole('ADMIN')")
+    public List<AppointmentWithDetails> getAllAppointmentsWithDetails() {
+        System.out.println("=== FETCHING APPOINTMENTS WITH DETAILS ===");
+        System.out.println("Using optimized query to fetch all appointment data in single request");
+        
+        List<AppointmentWithDetails> appointments = appointmentService.getAllAppointmentsWithDetails();
+        
+        System.out.println("Successfully fetched " + appointments.size() + " appointments with details");
+        System.out.println("==========================================");
+        
+        return appointments;
     }
 
 }
