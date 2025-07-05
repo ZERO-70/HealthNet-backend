@@ -75,6 +75,49 @@ public class PatientController {
 
     @PostMapping
     public ResponseEntity<Long> addPatient(@RequestBody Patient patient) {
+        // Validate required fields
+        if (patient.getName() == null || patient.getName().trim().isEmpty()) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        if (patient.getGender() == null || patient.getGender().trim().isEmpty()) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        if (patient.getAge() == null || patient.getAge() <= 0 || patient.getAge() > 120) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        if (patient.getBirthdate() == null) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        if (patient.getContact_info() == null || patient.getContact_info().trim().isEmpty()) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        if (patient.getAddress() == null || patient.getAddress().trim().isEmpty()) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        if (patient.getWeight() == null || patient.getWeight().trim().isEmpty()) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        try {
+            double weight = Double.parseDouble(patient.getWeight());
+            if (weight <= 0 || weight > 500) {
+                return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        
+        if (patient.getHeight() == null || patient.getHeight().trim().isEmpty()) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        try {
+            double height = Double.parseDouble(patient.getHeight());
+            if (height <= 0 || height > 300) {
+                return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(-1L, HttpStatus.BAD_REQUEST);
+        }
+        
         Long result = patientService.addPatient(patient);
         if (result > 0) {
             return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -90,8 +133,8 @@ public class PatientController {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserAuthentication userAuthentication = userAuthenticationService.getUserByUsername(username);
-        if (userAuthentication.getPersonId() != patient.getId()) {
-            return new ResponseEntity<>("Ids don,t match", HttpStatus.FORBIDDEN);
+        if (!userAuthentication.getPersonId().equals(patient.getId())) {
+            return new ResponseEntity<>("Ids don't match", HttpStatus.FORBIDDEN);
         }
 
         int rowsAffected = patientService.updatePatient(patient);
