@@ -1,6 +1,7 @@
 package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Doctor;
+import com.server.HealthNet.Model.DoctorSummaryDTO;
 import com.server.HealthNet.Model.Patient;
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.UserAuthentication;
@@ -150,6 +151,17 @@ public class DoctorController {
 
         List<String> availableTimes = doctorService.getAvailableAppointmentTimes(id, parsedDate);
         return ResponseEntity.ok(availableTimes);
+    }
+
+    /**
+     * Get all doctor summaries (ID and name only)
+     * Lightweight endpoint for dropdowns and selections
+     */
+    @GetMapping("/summaries")
+    @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<List<DoctorSummaryDTO>> getAllDoctorSummaries() {
+        List<DoctorSummaryDTO> summaries = doctorService.getAllDoctorSummaries();
+        return ResponseEntity.ok(summaries);
     }
 
 }

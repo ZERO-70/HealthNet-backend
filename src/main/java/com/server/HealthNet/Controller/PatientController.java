@@ -1,6 +1,7 @@
 package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Patient;
+import com.server.HealthNet.Model.PatientSummaryDTO;
 import com.server.HealthNet.Model.PatientWithDetails;
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.UserAuthentication;
@@ -156,5 +157,16 @@ public class PatientController {
         System.out.println("=======================================");
         
         return patients;
+    }
+
+    /**
+     * Get all patient summaries (ID and name only)
+     * Lightweight endpoint for dropdowns and selections
+     */
+    @GetMapping("/summaries")
+    @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<List<PatientSummaryDTO>> getAllPatientSummaries() {
+        List<PatientSummaryDTO> summaries = patientService.getAllPatientSummaries();
+        return ResponseEntity.ok(summaries);
     }
 }

@@ -1,6 +1,7 @@
 package com.server.HealthNet.Service;
 
 import com.server.HealthNet.Model.Doctor;
+import com.server.HealthNet.Model.DoctorSummaryDTO;
 import com.server.HealthNet.Repository.DoctorRepository;
 import org.springframework.stereotype.Service;
 
@@ -46,5 +47,13 @@ public class DoctorService {
 
     public List<String> getAvailableAppointmentTimes(Long doctorId, LocalDate date) {
         return doctorRepository.getAvailableAppointmentTimes(doctorId, date);
+    }
+
+    /**
+     * Get all doctor summaries (ID and name only)
+     * Optimized for lightweight operations that only need basic doctor information
+     */
+    public List<DoctorSummaryDTO> getAllDoctorSummaries() {
+        return doctorRepository.findAllDoctorSummaries();
     }
 }
