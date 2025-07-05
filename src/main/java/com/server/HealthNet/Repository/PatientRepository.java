@@ -79,17 +79,18 @@ public class PatientRepository {
                 String placeholders = recordIds.stream().map(id -> "?").collect(java.util.stream.Collectors.joining(","));
                 String deleteMedicalRecordAttachmentsSql = 
                     "DELETE FROM medical_record_attachments WHERE record_id IN (" + placeholders + ")";
-                jdbcTemplate.update(deleteMedicalRecordAttachmentsSql, recordIds.toArray());
+                jdbcTemplate.update(deleteMedicalRecordAttachmentsSql, recordIds.toArray(new Object[0]));
                 
                 // Delete medical record lab results for each record
+                System.out.println(" Place holder**** : " + placeholders);
                 String deleteMedicalRecordLabResultsSql = 
-                    "DELETE FROM medical_record_lab_results WHERE record_id IN (" + placeholders + ")";
-                jdbcTemplate.update(deleteMedicalRecordLabResultsSql, recordIds.toArray());
+                    "DELETE FROM lab_results WHERE record_id IN (" + placeholders + ")";
+                jdbcTemplate.update(deleteMedicalRecordLabResultsSql, recordIds.toArray(new Object[0]));
                 
                 // Delete medical record audit trails for each record
                 String deleteMedicalRecordAuditSql = 
                     "DELETE FROM medical_record_audit WHERE record_id IN (" + placeholders + ")";
-                jdbcTemplate.update(deleteMedicalRecordAuditSql, recordIds.toArray());
+                jdbcTemplate.update(deleteMedicalRecordAuditSql, recordIds.toArray(new Object[0]));
             }
             
             // Delete medical records for this patient
