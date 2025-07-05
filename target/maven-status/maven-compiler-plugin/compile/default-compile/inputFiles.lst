@@ -5,6 +5,7 @@
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/DoctorController.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/HomeController.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/InventoryController.java
+/home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/ManagementController.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/MedicalRecordController.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/PatientController.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Controller/PersonController.java
@@ -16,6 +17,7 @@
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/ApiQueryRequest.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/ApiQueryResponse.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/Appointment.java
+/home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/AppointmentWithDetails.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/Avalibility.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/Chat.java
 /home/zair/healthnet_backend/HealthNet-backend/src/main/java/com/server/HealthNet/Model/CustomUserDetails.java

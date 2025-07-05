@@ -1,6 +1,7 @@
 package com.server.HealthNet.Service;
 
 import com.server.HealthNet.Model.Patient;
+import com.server.HealthNet.Model.PatientWithDetails;
 import com.server.HealthNet.Repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,14 @@ public class PatientService {
 
     public Long addPatient(Patient patient) {
         return patientRepository.savePatient(patient);
+    }
+
+    /**
+     * Optimized method to get all patients with comprehensive details
+     * This method fetches all data in a single query to improve performance
+     * Used by staff portal for detailed patient information
+     */
+    public List<PatientWithDetails> getAllPatientsWithDetails() {
+        return patientRepository.findAllPatientsWithDetails();
     }
 }

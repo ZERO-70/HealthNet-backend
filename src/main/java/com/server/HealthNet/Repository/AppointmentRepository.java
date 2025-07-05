@@ -1,6 +1,7 @@
 package com.server.HealthNet.Repository;
 
 import com.server.HealthNet.Model.Appointment;
+import com.server.HealthNet.Model.AppointmentWithDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -101,5 +102,50 @@ public class AppointmentRepository {
                 startTime, endTime, 
                 startTime, endTime);
         return count != null && count > 0; // Returns true if any pending appointment overlaps
+    }
+
+    // Map ResultSet to AppointmentWithDetails object
+    private AppointmentWithDetails mapRowToAppointmentWithDetails(ResultSet rs, int rowNum) throws SQLException {
+        AppointmentWithDetails appointment = new AppointmentWithDetails();
+        appointment.setAppointment_id(rs.getLong("appointment_id"));
+        appointment.setPatient_id(rs.getLong("patient_id"));
+        appointment.setDoctor_id(rs.getLong("doctor_id"));
+        appointment.setDate(rs.getObject("date", LocalDate.class));
+        appointment.setStartTime(rs.getObject("start_time", LocalTime.class));
+        appointment.setEndTime(rs.getObject("end_time", LocalTime.class));
+        appointment.setIs_pending(rs.getBoolean("is_pending"));
+        appointment.setIs_approved(rs.getBoolean("is_approved"));
+        appointment.setPatient_name(rs.getString("patient_name"));
+        appointment.setDoctor_name(rs.getString("doctor_name"));
+        appointment.setDoctor_specialization(rs.getString("doctor_specialization"));
+        return appointment;
+    }
+
+    /**
+     * Optimized method to fetch all appointments with patient and doctor details in a single query
+     * This eliminates the N+1 query problem by using JOINs
+     */
+    public List<AppointmentWithDetails> findAllWithDetails() {
+        String sql = """
+            SELECT 
+                a.appointment_id,
+                a.patient_id,
+                a.doctor_id,
+                a.date,
+                a.start_time,
+                a.end_time,
+                a.is_pending,
+                a.is_approved,
+                p_patient.name AS patient_name,
+                p_doctor.name AS doctor_name,
+                d.specialization AS doctor_specialization
+            FROM appointments a
+            INNER JOIN patient pt ON a.patient_id = pt.patient_id
+            INNER JOIN person p_patient ON pt.patient_id = p_patient.person_id
+            INNER JOIN doctor d ON a.doctor_id = d.doctor_id
+            INNER JOIN person p_doctor ON d.doctor_id = p_doctor.person_id
+            ORDER BY a.date DESC, a.start_time DESC
+            """;
+        return jdbcTemplate.query(sql, this::mapRowToAppointmentWithDetails);
     }
 }

@@ -1,6 +1,7 @@
 package com.server.HealthNet.Controller;
 
 import com.server.HealthNet.Model.Patient;
+import com.server.HealthNet.Model.PatientWithDetails;
 import com.server.HealthNet.Model.Role;
 import com.server.HealthNet.Model.UserAuthentication;
 import com.server.HealthNet.Service.PatientService;
@@ -136,5 +137,24 @@ public class PatientController {
             response.put("message", "Patient deletion failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    /**
+     * Optimized endpoint to get all patients with comprehensive details
+     * This endpoint reduces the number of database queries from N+1 to 1
+     * Used by staff portal for faster patient loading with detailed information
+     */
+    @GetMapping("/with-details")
+    @PreAuthorize("hasRole('STAFF') or hasRole('ADMIN')")
+    public List<PatientWithDetails> getAllPatientsWithDetails() {
+        System.out.println("=== FETCHING PATIENTS WITH DETAILS ===");
+        System.out.println("Using optimized query to fetch all patient data in single request");
+        
+        List<PatientWithDetails> patients = patientService.getAllPatientsWithDetails();
+        
+        System.out.println("Successfully fetched " + patients.size() + " patients with details");
+        System.out.println("=======================================");
+        
+        return patients;
     }
 }
