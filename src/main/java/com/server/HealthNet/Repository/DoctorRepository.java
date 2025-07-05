@@ -3,6 +3,7 @@ package com.server.HealthNet.Repository;
 import com.server.HealthNet.Model.Appointment;
 import com.server.HealthNet.Model.Avalibility;
 import com.server.HealthNet.Model.Doctor;
+import com.server.HealthNet.Model.DoctorSummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -206,5 +207,24 @@ public class DoctorRepository {
         }
 
         return availableTimes;
+    }
+
+    /**
+     * Retrieves all doctor names and IDs for summary purposes
+     * Optimized query to fetch only essential fields
+     *
+     * @return List of DoctorSummaryDTO containing doctor IDs and names
+     */
+    public List<DoctorSummaryDTO> findAllDoctorSummaries() {
+        String sql = "SELECT p.person_id, p.name FROM doctor d " +
+                "JOIN person p ON d.doctor_id = p.person_id " +
+                "ORDER BY p.name ASC";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            DoctorSummaryDTO summary = new DoctorSummaryDTO();
+            summary.setId(rs.getLong("person_id"));
+            summary.setName(rs.getString("name"));
+            return summary;
+        });
     }
 }

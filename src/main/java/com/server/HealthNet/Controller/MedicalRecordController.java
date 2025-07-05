@@ -93,6 +93,11 @@ public class MedicalRecordController {
             response.put("message", "Medical Record created successfully");
             response.put("recordId", recordId);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            // Handle validation errors with specific messages
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Medical Record creation failed: " + e.getMessage());
@@ -128,6 +133,11 @@ public class MedicalRecordController {
                 response.put("message", "Medical Record update failed - record not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
+        } catch (IllegalArgumentException e) {
+            // Handle validation errors with specific messages
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Medical Record update failed: " + e.getMessage());

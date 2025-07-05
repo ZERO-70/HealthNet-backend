@@ -8,6 +8,8 @@ import com.server.HealthNet.Repository.LabResultRepository;
 import com.server.HealthNet.Repository.MedicalRecordAttachmentRepository;
 import com.server.HealthNet.Repository.MedicalRecordAuditRepository;
 import com.server.HealthNet.Repository.MedicalRecordRepository;
+import com.server.HealthNet.Repository.PatientRepository;
+import com.server.HealthNet.Repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,12 @@ public class MedicalRecordService {
     @Autowired
     private MedicalRecordAuditRepository auditRepository;
 
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private DoctorRepository doctorRepository;
+
     public List<MedicalRecord> getAllMedicalRecords() {
         return medicalRecordRepository.findAll();
     }
@@ -52,6 +60,20 @@ public class MedicalRecordService {
 
     @Transactional
     public Long createMedicalRecord(MedicalRecord record, Long userId) {
+        // Validate patient ID if provided
+        if (record.getPatientId() != null) {
+            if (!patientRepository.findPatientById(record.getPatientId()).isPresent()) {
+                throw new IllegalArgumentException("Invalid Patient ID: " + record.getPatientId() + ". Patient does not exist in the system.");
+            }
+        }
+
+        // Validate doctor ID if provided
+        if (record.getDoctorId() != null) {
+            if (!doctorRepository.findDoctorById(record.getDoctorId()).isPresent()) {
+                throw new IllegalArgumentException("Invalid Doctor ID: " + record.getDoctorId() + ". Doctor does not exist in the system.");
+            }
+        }
+
         // Print all fields before saving
         System.out.println("======= Creating New Medical Record =======");
         System.out.println("Record ID: " + record.getRecordId());
@@ -85,6 +107,20 @@ public class MedicalRecordService {
 
     @Transactional
     public int updateMedicalRecord(MedicalRecord record, Long userId) {
+        // Validate patient ID if provided
+        if (record.getPatientId() != null) {
+            if (!patientRepository.findPatientById(record.getPatientId()).isPresent()) {
+                throw new IllegalArgumentException("Invalid Patient ID: " + record.getPatientId() + ". Patient does not exist in the system.");
+            }
+        }
+
+        // Validate doctor ID if provided
+        if (record.getDoctorId() != null) {
+            if (!doctorRepository.findDoctorById(record.getDoctorId()).isPresent()) {
+                throw new IllegalArgumentException("Invalid Doctor ID: " + record.getDoctorId() + ". Doctor does not exist in the system.");
+            }
+        }
+
         // Print all fields before updating
         System.out.println("======= Updating Medical Record: " + record.getRecordId() + " =======");
         System.out.println("Record ID: " + record.getRecordId());

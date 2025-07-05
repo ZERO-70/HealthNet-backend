@@ -1,6 +1,7 @@
 package com.server.HealthNet.Service;
 
 import com.server.HealthNet.Model.Patient;
+import com.server.HealthNet.Model.PatientSummaryDTO;
 import com.server.HealthNet.Model.PatientWithDetails;
 import com.server.HealthNet.Repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +45,13 @@ public class PatientService {
      */
     public List<PatientWithDetails> getAllPatientsWithDetails() {
         return patientRepository.findAllPatientsWithDetails();
+    }
+
+    /**
+     * Get all patient summaries (ID and name only)
+     * Optimized for lightweight operations that only need basic patient information
+     */
+    public List<PatientSummaryDTO> getAllPatientSummaries() {
+        return patientRepository.findAllPatientSummaries();
     }
 }

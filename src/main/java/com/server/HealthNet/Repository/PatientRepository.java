@@ -1,6 +1,7 @@
 package com.server.HealthNet.Repository;
 
 import com.server.HealthNet.Model.Patient;
+import com.server.HealthNet.Model.PatientSummaryDTO;
 import com.server.HealthNet.Model.PatientWithDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -277,5 +278,24 @@ public class PatientRepository {
             ORDER BY p.name ASC
             """;
         return jdbcTemplate.query(sql, this::mapRowToPatientWithDetails);
+    }
+
+    /**
+     * Retrieves all patient names and IDs for summary purposes
+     * Optimized query to fetch only essential fields
+     * 
+     * @return List of PatientSummaryDTO containing patient IDs and names
+     */
+    public List<PatientSummaryDTO> findAllPatientSummaries() {
+        String sql = "SELECT p.person_id, p.name FROM patient pat " +
+                    "JOIN person p ON pat.patient_id = p.person_id " +
+                    "ORDER BY p.name ASC";
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            PatientSummaryDTO summary = new PatientSummaryDTO();
+            summary.setId(rs.getLong("person_id"));
+            summary.setName(rs.getString("name"));
+            return summary;
+        });
     }
 }
