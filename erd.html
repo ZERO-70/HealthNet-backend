@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>HealthNet ERD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0d1117;font-family:'Inter',sans-serif;color:#e6edf3;overflow:auto}
+  h1{text-align:center;padding:28px 0 8px;font-size:1.8rem;font-weight:700;
+     background:linear-gradient(135deg,#58a6ff,#79c0ff,#a371f7);
+     -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .subtitle{text-align:center;color:#8b949e;font-size:.85rem;margin-bottom:24px;letter-spacing:.5px}
+  #canvas-wrap{position:relative;width:2600px;margin:0 auto;padding:20px 40px 60px}
+  svg#lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .table{position:absolute;width:230px;border-radius:10px;overflow:hidden;
+         box-shadow:0 0 0 1px rgba(255,255,255,.07),0 8px 32px rgba(0,0,0,.5);
+         background:#161b22}
+  .table-head{padding:10px 14px;font-size:.78rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+              display:flex;align-items:center;gap:8px}
+  .table-head .icon{width:16px;height:16px;border-radius:4px;flex-shrink:0}
+  .table-body{border-top:1px solid #21262d}
+  .row{display:flex;align-items:center;padding:5px 14px;font-size:.72rem;border-bottom:1px solid #21262d;gap:6px}
+  .row:last-child{border-bottom:none}
+  .row.pk{background:rgba(88,166,255,.06)}
+  .row.fk{background:rgba(163,113,247,.06)}
+  .badge{font-size:.6rem;padding:1px 5px;border-radius:3px;font-weight:600;letter-spacing:.4px;flex-shrink:0}
+  .badge.pk{background:#1f3a52;color:#58a6ff;border:1px solid #1d4e7a}
+  .badge.fk{background:#2a1f52;color:#a371f7;border:1px solid #3d2b7a}
+  .col-name{flex:1;color:#c9d1d9}
+  .col-type{color:#6e7681;font-size:.65rem;flex-shrink:0}
+  /* colour themes per domain */
+  .t-core .table-head{background:linear-gradient(135deg,#0d3060,#1a4a8a)}
+  .t-core .table-head .icon{background:#58a6ff}
+  .t-medical .table-head{background:linear-gradient(135deg,#1a3320,#2a5238)}
+  .t-medical .table-head .icon{background:#3fb950}
+  .t-support .table-head{background:linear-gradient(135deg,#2d1f52,#4a2d80)}
+  .t-support .table-head .icon{background:#a371f7}
+  .t-comms .table-head{background:linear-gradient(135deg,#3a1f1f,#6b2c2c)}
+  .t-comms .table-head .icon{background:#f85149}
+  /* legend */
+  .legend{position:fixed;bottom:20px;right:20px;background:#161b22;border:1px solid #21262d;
+          border-radius:10px;padding:12px 16px;font-size:.72rem;color:#8b949e}
+  .legend h4{color:#e6edf3;margin-bottom:8px;font-size:.75rem}
+  .leg-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .leg-line{width:30px;height:2px}
+  .controls{text-align:center;margin-bottom:16px;color:#6e7681;font-size:.78rem}
+</style>
+</head>
+<body>
+<h1>HealthNet — Database ERD</h1>
+<p class="subtitle">Entity Relationship Diagram &nbsp;·&nbsp; Auto-generated from source models</p>
+<p class="controls">Scroll / zoom the page to navigate &nbsp;|&nbsp; 16 entities</p>
+
+<div id="canvas-wrap">
+<svg id="lines"></svg>
+
+<!-- ══════════════════════ PERSON (base) ══════════════════════ -->
+<div class="table t-core" id="t-person" style="left:680px;top:40px">
+  <div class="table-head"><span class="icon"></span>Person</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">gender</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">age</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">birthdate</span><span class="col-type">DATE</span></div>
+    <div class="row"><span class="col-name">contact_info</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">address</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">image</span><span class="col-type">BLOB</span></div>
+    <div class="row"><span class="col-name">image_type</span><span class="col-type">VARCHAR</span></div>
+  </div>
+</div>
+
+<!-- DOCTOR -->
+<div class="table t-core" id="t-doctor" style="left:200px;top:280px">
+  <div class="table-head"><span class="icon"></span>Doctor</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">specialization</span><span class="col-type">VARCHAR</span></div>
+  </div>
+</div>
+
+<!-- PATIENT -->
+<div class="table t-core" id="t-patient" style="left:680px;top:280px">
+  <div class="table-head"><span class="icon"></span>Patient</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">weight</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">height</span><span class="col-type">VARCHAR</span></div>
+  </div>
+</div>
+
+<!-- STAFF -->
+<div class="table t-core" id="t-staff" style="left:1160px;top:280px">
+  <div class="table-head"><span class="icon"></span>Staff</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">proffession</span><span class="col-type">VARCHAR</span></div>
+  </div>
+</div>
+
+<!-- USER AUTHENTICATION -->
+<div class="table t-core" id="t-auth" style="left:1160px;top:40px">
+  <div class="table-head"><span class="icon"></span>UserAuthentication</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">username</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">password</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">role</span><span class="col-type">ENUM</span></div>
+    <div class="row"><span class="col-name">subscription</span><span class="col-type">ENUM</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">personId</span><span class="col-type">BIGINT</span></div>
+  </div>
+</div>
+
+<!-- DEPARTMENT -->
+<div class="table t-support" id="t-dept" style="left:680px;top:520px">
+  <div class="table-head"><span class="icon"></span>Department</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">department_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
+  </div>
+</div>
+
+<!-- AVAILABILITY -->
+<div class="table t-core" id="t-avail" style="left:200px;top:520px">
+  <div class="table-head"><span class="icon"></span>Availability</div>
+  <div class="table-body">
+    <div class="row pk fk"><span class="badge pk">PK</span><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">Mon_startTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">Mon_endTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">Tue_startTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">Tue_endTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">Wed … Sun</span><span class="col-type">TIME ×10</span></div>
+  </div>
+</div>
+
+<!-- TREATMENT -->
+<div class="table t-support" id="t-treat" style="left:200px;top:800px">
+  <div class="table-head"><span class="icon"></span>Treatment</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">treatement_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">department_id</span><span class="col-type">BIGINT</span></div>
+  </div>
+</div>
+
+<!-- APPOINTMENT -->
+<div class="table t-support" id="t-appt" style="left:1160px;top:520px">
+  <div class="table-head"><span class="icon"></span>Appointment</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">appointment_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">patient_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">date</span><span class="col-type">DATE</span></div>
+    <div class="row"><span class="col-name">startTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">endTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">is_pending</span><span class="col-type">BOOL</span></div>
+    <div class="row"><span class="col-name">is_approved</span><span class="col-type">BOOL</span></div>
+  </div>
+</div>
+
+<!-- MEDICAL RECORD -->
+<div class="table t-medical" id="t-mr" style="left:680px;top:800px">
+  <div class="table-head"><span class="icon"></span>MedicalRecord</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">patientId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctorId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">departmentId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">treatmentId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">recordType</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">title</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">diagnosis</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">notes</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">recordDate</span><span class="col-type">DATE</span></div>
+    <div class="row"><span class="col-name">createdAt</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">updatedAt</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">bloodPressure</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">heartRate</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">respiratoryRate</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">temperature</span><span class="col-type">DOUBLE</span></div>
+    <div class="row"><span class="col-name">oxygenSaturation</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">height</span><span class="col-type">DOUBLE</span></div>
+    <div class="row"><span class="col-name">weight</span><span class="col-type">DOUBLE</span></div>
+  </div>
+</div>
+
+<!-- LAB RESULT -->
+<div class="table t-medical" id="t-lab" style="left:200px;top:1120px">
+  <div class="table-head"><span class="icon"></span>LabResult</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">resultId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">testName</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">testValue</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">testUnit</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">referenceRange</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">isAbnormal</span><span class="col-type">BOOL</span></div>
+    <div class="row"><span class="col-name">notes</span><span class="col-type">TEXT</span></div>
+  </div>
+</div>
+
+<!-- ATTACHMENT -->
+<div class="table t-medical" id="t-attach" style="left:680px;top:1220px">
+  <div class="table-head"><span class="icon"></span>MedicalRecordAttachment</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">attachmentId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">fileName</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">fileType</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">contentType</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">fileSize</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">fileData</span><span class="col-type">BLOB</span></div>
+    <div class="row"><span class="col-name">filePath</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">uploadedAt</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+  </div>
+</div>
+
+<!-- AUDIT -->
+<div class="table t-medical" id="t-audit" style="left:1160px;top:1120px">
+  <div class="table-head"><span class="icon"></span>MedicalRecordAudit</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">auditId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">userId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">actionType</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">actionTimestamp</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">actionDetails</span><span class="col-type">TEXT</span></div>
+  </div>
+</div>
+
+<!-- INVENTORY -->
+<div class="table t-support" id="t-inv" style="left:1160px;top:800px">
+  <div class="table-head"><span class="icon"></span>Inventory</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">inventory_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">quantity</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">expiryDate</span><span class="col-type">DATE</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">department_id</span><span class="col-type">BIGINT</span></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="table t-comms" id="t-chat" style="left:1600px;top:40px">
+  <div class="table-head"><span class="icon"></span>Chat</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">messageId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">personId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">request</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">response</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">timestamp</span><span class="col-type">DATETIME</span></div>
+  </div>
+</div>
+
+<!-- SUGGESTION -->
+<div class="table t-comms" id="t-sug" style="left:1600px;top:260px">
+  <div class="table-head"><span class="icon"></span>Suggestion</div>
+  <div class="table-body">
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">suggestionId</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">personId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">suggestionText</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">createdAt</span><span class="col-type">DATETIME</span></div>
+  </div>
+</div>
+
+</div><!-- /canvas-wrap -->
+
+<div class="legend">
+  <h4>Legend</h4>
+  <div class="leg-row"><div class="leg-line" style="background:#58a6ff"></div> Core / Identity</div>
+  <div class="leg-row"><div class="leg-line" style="background:#3fb950"></div> Medical Records</div>
+  <div class="leg-row"><div class="leg-line" style="background:#a371f7"></div> Support / Admin</div>
+  <div class="leg-row"><div class="leg-line" style="background:#f85149"></div> Communications</div>
+  <div class="leg-row"><div class="leg-line" style="background:#58a6ff;height:2px;border-top:1px dashed #58a6ff;background:none"></div> FK Relationship</div>
+</div>
+
+<script>
+// Draw SVG connector lines between related tables
+const svg = document.getElementById('lines');
+const wrap = document.getElementById('canvas-wrap');
+
+function mid(el, side) {
+  const r = el.getBoundingClientRect();
+  const wr = wrap.getBoundingClientRect();
+  const x = r.left - wr.left + wrap.scrollLeft;
+  const y = r.top  - wr.top  + wrap.scrollTop;
+  if (side==='right')  return {x: x+r.width, y: y+r.height/2};
+  if (side==='left')   return {x: x,         y: y+r.height/2};
+  if (side==='bottom') return {x: x+r.width/2, y: y+r.height};
+  if (side==='top')    return {x: x+r.width/2, y: y};
+}
+
+function line(a, b, color='#30363d', dash=false) {
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  const cx = (a.x+b.x)/2;
+  path.setAttribute('d',`M${a.x},${a.y} C${cx},${a.y} ${cx},${b.y} ${b.x},${b.y}`);
+  path.setAttribute('stroke', color);
+  path.setAttribute('stroke-width','1.5');
+  path.setAttribute('fill','none');
+  path.setAttribute('opacity','0.6');
+  if(dash) path.setAttribute('stroke-dasharray','5,4');
+  svg.appendChild(path);
+  // arrowhead
+  const marker = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  marker.setAttribute('cx', b.x); marker.setAttribute('cy', b.y);
+  marker.setAttribute('r','3');
+  marker.setAttribute('fill', color);
+  svg.appendChild(marker);
+}
+
+window.addEventListener('load', () => {
+  const g = id => document.getElementById(id);
+  svg.setAttribute('height', wrap.scrollHeight);
+
+  // Person -> Doctor/Patient/Staff (inheritance - dashed)
+  line(mid(g('t-person'),'bottom'), mid(g('t-doctor'),'top'), '#58a6ff', true);
+  line(mid(g('t-person'),'bottom'), mid(g('t-patient'),'top'), '#58a6ff', true);
+  line(mid(g('t-person'),'bottom'), mid(g('t-staff'),'top'),  '#58a6ff', true);
+
+  // UserAuthentication -> Person
+  line(mid(g('t-auth'),'left'), mid(g('t-person'),'right'), '#a371f7');
+
+  // Availability -> Doctor
+  line(mid(g('t-avail'),'right'), mid(g('t-doctor'),'bottom'), '#58a6ff');
+
+  // Treatment -> Doctor
+  line(mid(g('t-treat'),'top'), mid(g('t-doctor'),'bottom'), '#a371f7');
+  // Treatment -> Department
+  line(mid(g('t-treat'),'right'), mid(g('t-dept'),'left'), '#a371f7');
+
+  // Appointment -> Patient
+  line(mid(g('t-appt'),'left'), mid(g('t-patient'),'right'), '#a371f7');
+  // Appointment -> Doctor
+  line(mid(g('t-appt'),'top'), mid(g('t-doctor'),'right'), '#a371f7');
+
+  // MedicalRecord -> Patient
+  line(mid(g('t-mr'),'top'), mid(g('t-patient'),'bottom'), '#3fb950');
+  // MedicalRecord -> Doctor
+  line(mid(g('t-mr'),'left'), mid(g('t-doctor'),'bottom'), '#3fb950');
+  // MedicalRecord -> Department
+  line(mid(g('t-mr'),'top'), mid(g('t-dept'),'bottom'), '#3fb950');
+  // MedicalRecord -> Treatment
+  line(mid(g('t-mr'),'left'), mid(g('t-treat'),'right'), '#3fb950');
+
+  // LabResult -> MedicalRecord
+  line(mid(g('t-lab'),'right'), mid(g('t-mr'),'left'), '#3fb950');
+  // Attachment -> MedicalRecord
+  line(mid(g('t-attach'),'top'), mid(g('t-mr'),'bottom'), '#3fb950');
+  // Audit -> MedicalRecord
+  line(mid(g('t-audit'),'left'), mid(g('t-mr'),'right'), '#3fb950');
+  // Audit -> Person (userId)
+  line(mid(g('t-audit'),'top'), mid(g('t-staff'),'bottom'), '#a371f7');
+
+  // Inventory -> Department
+  line(mid(g('t-inv'),'left'), mid(g('t-dept'),'right'), '#a371f7');
+
+  // Chat -> Person
+  line(mid(g('t-chat'),'left'), mid(g('t-person'),'right'), '#f85149');
+  // Suggestion -> Person
+  line(mid(g('t-sug'),'left'), mid(g('t-person'),'right'), '#f85149');
+});
+</script>
+</body>
+</html>
