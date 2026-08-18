@@ -49,7 +49,7 @@
 </head>
 <body>
 <h1>HealthNet — Database ERD</h1>
-<p class="subtitle">Entity Relationship Diagram &nbsp;·&nbsp; Auto-generated from source models</p>
+<p class="subtitle">Entity Relationship Diagram &nbsp;·&nbsp; Generated from db/01_schema.sql</p>
 <p class="controls">Scroll / zoom the page to navigate &nbsp;|&nbsp; 16 entities</p>
 
 <div id="canvas-wrap">
@@ -66,7 +66,7 @@
     <div class="row"><span class="col-name">birthdate</span><span class="col-type">DATE</span></div>
     <div class="row"><span class="col-name">contact_info</span><span class="col-type">VARCHAR</span></div>
     <div class="row"><span class="col-name">address</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">image</span><span class="col-type">BLOB</span></div>
+    <div class="row"><span class="col-name">image</span><span class="col-type">LONGBLOB</span></div>
     <div class="row"><span class="col-name">image_type</span><span class="col-type">VARCHAR</span></div>
   </div>
 </div>
@@ -75,7 +75,7 @@
 <div class="table t-core" id="t-doctor" style="left:200px;top:280px">
   <div class="table-head"><span class="icon"></span>Doctor</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row pk fk"><span class="badge pk">PK</span><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
     <div class="row"><span class="col-name">specialization</span><span class="col-type">VARCHAR</span></div>
   </div>
 </div>
@@ -84,7 +84,7 @@
 <div class="table t-core" id="t-patient" style="left:680px;top:280px">
   <div class="table-head"><span class="icon"></span>Patient</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row pk fk"><span class="badge pk">PK</span><span class="badge fk">FK</span><span class="col-name">patient_id</span><span class="col-type">BIGINT</span></div>
     <div class="row"><span class="col-name">weight</span><span class="col-type">VARCHAR</span></div>
     <div class="row"><span class="col-name">height</span><span class="col-type">VARCHAR</span></div>
   </div>
@@ -94,8 +94,8 @@
 <div class="table t-core" id="t-staff" style="left:1160px;top:280px">
   <div class="table-head"><span class="icon"></span>Staff</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">proffession</span><span class="col-type">VARCHAR</span></div>
+    <div class="row pk fk"><span class="badge pk">PK</span><span class="badge fk">FK</span><span class="col-name">staff_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">profession</span><span class="col-type">VARCHAR</span></div>
   </div>
 </div>
 
@@ -105,9 +105,9 @@
   <div class="table-body">
     <div class="row pk"><span class="badge pk">PK</span><span class="col-name">username</span><span class="col-type">VARCHAR</span></div>
     <div class="row"><span class="col-name">password</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">role</span><span class="col-type">ENUM</span></div>
-    <div class="row"><span class="col-name">subscription</span><span class="col-type">ENUM</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">personId</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">role</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">subscription</span><span class="col-type">VARCHAR</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
   </div>
 </div>
 
@@ -137,7 +137,7 @@
 <div class="table t-support" id="t-treat" style="left:200px;top:800px">
   <div class="table-head"><span class="icon"></span>Treatment</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">treatement_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">treatment_id</span><span class="col-type">BIGINT</span></div>
     <div class="row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
     <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
     <div class="row fk"><span class="badge fk">FK</span><span class="col-name">department_id</span><span class="col-type">BIGINT</span></div>
@@ -152,8 +152,8 @@
     <div class="row fk"><span class="badge fk">FK</span><span class="col-name">patient_id</span><span class="col-type">BIGINT</span></div>
     <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
     <div class="row"><span class="col-name">date</span><span class="col-type">DATE</span></div>
-    <div class="row"><span class="col-name">startTime</span><span class="col-type">TIME</span></div>
-    <div class="row"><span class="col-name">endTime</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">start_time</span><span class="col-type">TIME</span></div>
+    <div class="row"><span class="col-name">end_time</span><span class="col-type">TIME</span></div>
     <div class="row"><span class="col-name">is_pending</span><span class="col-type">BOOL</span></div>
     <div class="row"><span class="col-name">is_approved</span><span class="col-type">BOOL</span></div>
   </div>
@@ -163,23 +163,23 @@
 <div class="table t-medical" id="t-mr" style="left:680px;top:800px">
   <div class="table-head"><span class="icon"></span>MedicalRecord</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">patientId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctorId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">departmentId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">treatmentId</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">recordType</span><span class="col-type">VARCHAR</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">record_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">patient_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">doctor_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">department_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">treatment_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">record_type</span><span class="col-type">VARCHAR</span></div>
     <div class="row"><span class="col-name">title</span><span class="col-type">VARCHAR</span></div>
     <div class="row"><span class="col-name">diagnosis</span><span class="col-type">TEXT</span></div>
     <div class="row"><span class="col-name">notes</span><span class="col-type">TEXT</span></div>
-    <div class="row"><span class="col-name">recordDate</span><span class="col-type">DATE</span></div>
-    <div class="row"><span class="col-name">createdAt</span><span class="col-type">DATETIME</span></div>
-    <div class="row"><span class="col-name">updatedAt</span><span class="col-type">DATETIME</span></div>
-    <div class="row"><span class="col-name">bloodPressure</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">heartRate</span><span class="col-type">INT</span></div>
-    <div class="row"><span class="col-name">respiratoryRate</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">record_date</span><span class="col-type">DATE</span></div>
+    <div class="row"><span class="col-name">created_at</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">updated_at</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">blood_pressure</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">heart_rate</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">respiratory_rate</span><span class="col-type">INT</span></div>
     <div class="row"><span class="col-name">temperature</span><span class="col-type">DOUBLE</span></div>
-    <div class="row"><span class="col-name">oxygenSaturation</span><span class="col-type">INT</span></div>
+    <div class="row"><span class="col-name">oxygen_saturation</span><span class="col-type">INT</span></div>
     <div class="row"><span class="col-name">height</span><span class="col-type">DOUBLE</span></div>
     <div class="row"><span class="col-name">weight</span><span class="col-type">DOUBLE</span></div>
   </div>
@@ -189,13 +189,13 @@
 <div class="table t-medical" id="t-lab" style="left:200px;top:1120px">
   <div class="table-head"><span class="icon"></span>LabResult</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">resultId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">testName</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">testValue</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">testUnit</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">referenceRange</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">isAbnormal</span><span class="col-type">BOOL</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">result_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">record_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">test_name</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">test_value</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">test_unit</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">reference_range</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">is_abnormal</span><span class="col-type">BOOL</span></div>
     <div class="row"><span class="col-name">notes</span><span class="col-type">TEXT</span></div>
   </div>
 </div>
@@ -204,15 +204,15 @@
 <div class="table t-medical" id="t-attach" style="left:680px;top:1220px">
   <div class="table-head"><span class="icon"></span>MedicalRecordAttachment</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">attachmentId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">fileName</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">fileType</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">contentType</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">fileSize</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">fileData</span><span class="col-type">BLOB</span></div>
-    <div class="row"><span class="col-name">filePath</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">uploadedAt</span><span class="col-type">DATETIME</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">attachment_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">record_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">file_name</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">file_type</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">content_type</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">file_size</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">file_data</span><span class="col-type">LONGBLOB</span></div>
+    <div class="row"><span class="col-name">file_path</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">uploaded_at</span><span class="col-type">DATETIME</span></div>
     <div class="row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
   </div>
 </div>
@@ -221,12 +221,12 @@
 <div class="table t-medical" id="t-audit" style="left:1160px;top:1120px">
   <div class="table-head"><span class="icon"></span>MedicalRecordAudit</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">auditId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">recordId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">userId</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">actionType</span><span class="col-type">VARCHAR</span></div>
-    <div class="row"><span class="col-name">actionTimestamp</span><span class="col-type">DATETIME</span></div>
-    <div class="row"><span class="col-name">actionDetails</span><span class="col-type">TEXT</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">audit_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">record_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">user_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">action_type</span><span class="col-type">VARCHAR</span></div>
+    <div class="row"><span class="col-name">action_timestamp</span><span class="col-type">DATETIME</span></div>
+    <div class="row"><span class="col-name">action_details</span><span class="col-type">TEXT</span></div>
   </div>
 </div>
 
@@ -237,7 +237,7 @@
     <div class="row pk"><span class="badge pk">PK</span><span class="col-name">inventory_id</span><span class="col-type">BIGINT</span></div>
     <div class="row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
     <div class="row"><span class="col-name">quantity</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">expiryDate</span><span class="col-type">DATE</span></div>
+    <div class="row"><span class="col-name">expiry_date</span><span class="col-type">DATE</span></div>
     <div class="row fk"><span class="badge fk">FK</span><span class="col-name">department_id</span><span class="col-type">BIGINT</span></div>
   </div>
 </div>
@@ -246,10 +246,10 @@
 <div class="table t-comms" id="t-chat" style="left:1600px;top:40px">
   <div class="table-head"><span class="icon"></span>Chat</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">messageId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">personId</span><span class="col-type">BIGINT</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">message_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
     <div class="row"><span class="col-name">request</span><span class="col-type">TEXT</span></div>
-    <div class="row"><span class="col-name">response</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">response</span><span class="col-type">MEDIUMTEXT</span></div>
     <div class="row"><span class="col-name">timestamp</span><span class="col-type">DATETIME</span></div>
   </div>
 </div>
@@ -258,10 +258,10 @@
 <div class="table t-comms" id="t-sug" style="left:1600px;top:260px">
   <div class="table-head"><span class="icon"></span>Suggestion</div>
   <div class="table-body">
-    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">suggestionId</span><span class="col-type">BIGINT</span></div>
-    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">personId</span><span class="col-type">BIGINT</span></div>
-    <div class="row"><span class="col-name">suggestionText</span><span class="col-type">TEXT</span></div>
-    <div class="row"><span class="col-name">createdAt</span><span class="col-type">DATETIME</span></div>
+    <div class="row pk"><span class="badge pk">PK</span><span class="col-name">suggestion_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row fk"><span class="badge fk">FK</span><span class="col-name">person_id</span><span class="col-type">BIGINT</span></div>
+    <div class="row"><span class="col-name">suggestion_text</span><span class="col-type">TEXT</span></div>
+    <div class="row"><span class="col-name">created_at</span><span class="col-type">DATETIME</span></div>
   </div>
 </div>
 
@@ -350,8 +350,8 @@ window.addEventListener('load', () => {
   line(mid(g('t-attach'),'top'), mid(g('t-mr'),'bottom'), '#3fb950');
   // Audit -> MedicalRecord
   line(mid(g('t-audit'),'left'), mid(g('t-mr'),'right'), '#3fb950');
-  // Audit -> Person (userId)
-  line(mid(g('t-audit'),'top'), mid(g('t-staff'),'bottom'), '#a371f7');
+  // Audit -> Person (user_id, soft reference)
+  line(mid(g('t-audit'),'top'), mid(g('t-person'),'right'), '#a371f7', true);
 
   // Inventory -> Department
   line(mid(g('t-inv'),'left'), mid(g('t-dept'),'right'), '#a371f7');

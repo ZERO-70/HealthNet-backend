@@ -21,11 +21,18 @@ HealthNet is a comprehensive healthcare management backend built with Spring Boo
 
 ## Database Schema (ERD)
 
-The application relies on a comprehensive relational database schema. We have generated an interactive HTML ERD diagram for easy exploration of the models.
+The application relies on a comprehensive relational database schema.
 
-![HealthNet ERD Diagram](erd_diagram.png)
+- **`db/01_schema.sql`** — the authoritative schema (16 tables). This is what the
+  database is actually created from.
+- **`erd.html`** — interactive diagram of that schema. Open it in any browser.
 
-> **Note**: An interactive, full version of the ERD is available in `erd.html`. Open it in any web browser to view the interactive diagram.
+> **Note**: `erd_diagram.png` is a stale snapshot of an earlier, inaccurate version
+> of the diagram (it showed Java field names such as `recordId` rather than the real
+> `record_id` columns, and the wrong primary keys for `doctor`/`patient`/`staff`).
+> Use `erd.html` instead; the PNG can be regenerated from it or deleted.
+
+See [SETUP.md](SETUP.md) for how to bring the database and services up locally.
 
 ## Project Structure
 

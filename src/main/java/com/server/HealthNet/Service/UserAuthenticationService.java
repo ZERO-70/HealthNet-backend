@@ -92,14 +92,20 @@ public class UserAuthenticationService {
     }
 
     public String verify(UserAuthentication userAuthentication) {
-        System.out.println(
-                "Inside verify .... " + userAuthentication.getUsername() + " " + userAuthentication.getPassword());
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 userAuthentication.getUsername(), userAuthentication.getPassword()));
-        System.out.println("checking fuck .... " + authentication.isAuthenticated());
-        return authentication.isAuthenticated()
-                ? jwTservice.generateToken(userAuthentication.getUsername(), userAuthentication.getRole().toString())
-                : "Not Authenticated";
+
+        if (!authentication.isAuthenticated()) {
+            return "Not Authenticated";
+        }
+
+        // The role is read from the stored account, not from the login request:
+        // a client-supplied role would be untrustworthy, and omitting it used to
+        // throw a NullPointerException here.
+        UserAuthentication stored = userAuthenticationRepository.findByUsername(userAuthentication.getUsername());
+        String role = (stored != null && stored.getRole() != null) ? stored.getRole().toString() : "PATIENT";
+
+        return jwTservice.generateToken(userAuthentication.getUsername(), role);
     }
 
     public boolean doesUsernameExist(String username) {

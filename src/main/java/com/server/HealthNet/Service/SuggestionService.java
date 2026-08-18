@@ -4,6 +4,7 @@ import com.server.HealthNet.Model.Suggestion;
 import com.server.HealthNet.Repository.SuggestionRepository;
 import com.server.HealthNet.Repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -29,6 +30,13 @@ public class SuggestionService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Value("${healthnet.ai.enabled:false}")
+    private boolean aiEnabled;
+
+    /** Base URL of the AI service; the advice/email paths hang off it. */
+    @Value("${healthnet.ai.base-url:}")
+    private String aiBaseUrl;
 
     // Global variable to track the date of last suggestion update
     private static LocalDate lastSuggestionUpdateDate = LocalDate.now();
@@ -76,7 +84,11 @@ public class SuggestionService {
      * suggestion
      */
     public Suggestion fetchAndSaveMedicalAdvice(Long patientId) {
-        String apiUrl = "http://159.89.49.64:7898/api/medical-advice";
+        if (!aiEnabled) {
+            System.out.println("AI service disabled; skipping medical advice fetch for patient " + patientId);
+            return null;
+        }
+        String apiUrl = aiBaseUrl + "/api/medical-advice";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -121,6 +133,13 @@ public class SuggestionService {
      */
     @Scheduled(cron = "0 29 20 * * ?") // Run at midnight every day
     public void fetchDailySuggestions() {
+        // Without the AI service this job would clear every suggestion and then have
+        // nothing to repopulate them with, so skip it entirely rather than wipe data.
+        if (!aiEnabled) {
+            System.out.println("AI service disabled; skipping daily suggestion refresh");
+            return;
+        }
+
         // First, delete all existing suggestions from the table
         int deletedCount = suggestionRepository.deleteAll();
         System.out.println("Deleted " + deletedCount + " existing suggestions");
@@ -154,13 +173,13 @@ public class SuggestionService {
 
                     // Console logging: Print the request data being sent to MAI API
                     System.out.println("=== MAI API REQUEST ===");
-                    System.out.println("API URL: http://159.89.49.64:7898/api/email");
+                    System.out.println("API URL: " + aiBaseUrl + "/api/email");
                     System.out.println("Request Headers: " + maiHeaders);
                     System.out.println("Request Body: " + suggestion);
                     System.out.println("========================");
 
                     // Send POST request to MAI endpoint
-                    String response = restTemplate.postForObject("http://159.89.49.64:7898/api/email", maiRequest,
+                    String response = restTemplate.postForObject(aiBaseUrl + "/api/email", maiRequest,
                             String.class);
 
                     // Console logging: Print the response received from MAI API

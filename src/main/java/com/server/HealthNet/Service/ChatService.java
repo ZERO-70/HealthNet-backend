@@ -6,6 +6,7 @@ import com.server.HealthNet.Model.ApiQueryResponse;
 import com.server.HealthNet.Model.ModelType;
 import com.server.HealthNet.Repository.ChatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,7 +26,28 @@ public class ChatService {
     @Autowired
     private ChatRepository chatRepository;
 
-    private final String QUERY_API_URL = "http://159.89.49.64:7898/api/query";
+    @Value("${healthnet.ai.enabled:false}")
+    private boolean aiEnabled;
+
+    @Value("${healthnet.ai.url:}")
+    private String queryApiUrl;
+
+    @Value("${healthnet.ai.timeout-ms:60000}")
+    private int aiTimeoutMs;
+
+    @Value("${healthnet.ai.unavailable-message:The AI assistant is currently unavailable.}")
+    private String unavailableMessage;
+
+    /** Shared RestTemplate configured with the AI service timeouts. */
+    private RestTemplate buildRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(aiTimeoutMs);
+        factory.setReadTimeout(aiTimeoutMs);
+        restTemplate.setRequestFactory(factory);
+        return restTemplate;
+    }
 
     public List<Chat> getAllChats() {
         return chatRepository.findAll();
@@ -52,6 +74,16 @@ public class ChatService {
     }
 
     public ApiQueryResponse processQuery(ApiQueryRequest request, Long personId) {
+        if (!aiEnabled) {
+            // Still record the attempt so the conversation history stays coherent.
+            Chat chat = new Chat();
+            chat.setPersonId(personId);
+            chat.setRequest(request.getQuery());
+            chat.setResponse(unavailableMessage);
+            chat.setTimestamp(LocalDateTime.now());
+            createChat(chat);
+            return new ApiQueryResponse(unavailableMessage);
+        }
         try {
             // Debug: Print the full request to the console
             System.out.println("==== ChatService: Processing API Query Request ====");
@@ -62,21 +94,14 @@ public class ChatService {
             System.out.println("Model: " + request.getModel());
             System.out.println("================================================");
 
-            // Create RestTemplate with 10 minute timeout
-            RestTemplate restTemplate = new RestTemplate();
-
-            // Configure request factory with 10 minute timeouts
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(600000); // 10 minutes connection timeout
-            factory.setReadTimeout(600000); // 10 minutes read timeout
-            restTemplate.setRequestFactory(factory);
+            RestTemplate restTemplate = buildRestTemplate();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(request, headers);
 
-            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+            ApiQueryResponse response = restTemplate.postForObject(queryApiUrl, entity, ApiQueryResponse.class);
 
             // Save the chat in the database
             Chat chat = new Chat();
@@ -113,15 +138,11 @@ public class ChatService {
      * @return API response
      */
     public ApiQueryResponse processUnauthenticatedQuery(String query) {
+        if (!aiEnabled) {
+            return new ApiQueryResponse(unavailableMessage);
+        }
         try {
-            // Create RestTemplate with 10 minute timeout
-            RestTemplate restTemplate = new RestTemplate();
-
-            // Configure request factory with 10 minute timeouts
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(600000); // 10 minutes connection timeout
-            factory.setReadTimeout(600000); // 10 minutes read timeout
-            restTemplate.setRequestFactory(factory);
+            RestTemplate restTemplate = buildRestTemplate();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -144,7 +165,7 @@ public class ChatService {
 
             HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(apiRequest, headers);
 
-            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+            ApiQueryResponse response = restTemplate.postForObject(queryApiUrl, entity, ApiQueryResponse.class);
 
             // Print response to console
             logger.info("Unauthenticated query: " + query);
@@ -164,14 +185,11 @@ public class ChatService {
 
     // Add new method with ModelType parameter
     public ApiQueryResponse processUnauthenticatedQuery(String query, ModelType model) {
+        if (!aiEnabled) {
+            return new ApiQueryResponse(unavailableMessage);
+        }
         try {
-            RestTemplate restTemplate = new RestTemplate();
-
-            // Configure request factory with 10 minute timeouts
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(600000); // 10 minutes connection timeout
-            factory.setReadTimeout(600000); // 10 minutes read timeout
-            restTemplate.setRequestFactory(factory);
+            RestTemplate restTemplate = buildRestTemplate();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -195,7 +213,7 @@ public class ChatService {
 
             HttpEntity<ApiQueryRequest> entity = new HttpEntity<>(apiRequest, headers);
 
-            ApiQueryResponse response = restTemplate.postForObject(QUERY_API_URL, entity, ApiQueryResponse.class);
+            ApiQueryResponse response = restTemplate.postForObject(queryApiUrl, entity, ApiQueryResponse.class);
 
             // Print response to console
             logger.info("Unauthenticated query: " + query);

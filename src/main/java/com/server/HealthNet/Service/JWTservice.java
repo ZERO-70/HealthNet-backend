@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +26,20 @@ public class JWTservice {
 
     private static String mykey = "";
 
-    JWTservice(){
+    /**
+     * Uses jwt.secret (a Base64-encoded HMAC-SHA256 key) when one is configured.
+     * Without it a fresh key is generated at startup, which invalidates every
+     * previously issued token on restart and breaks sessions across instances,
+     * so a real deployment should always set JWT_SECRET.
+     */
+    JWTservice(@Value("${jwt.secret:}") String configuredSecret) {
+        if (configuredSecret != null && !configuredSecret.isBlank()) {
+            mykey = configuredSecret;
+            return;
+        }
         try {
             KeyGenerator keygen =KeyGenerator.getInstance("HmacSHA256");
-            SecretKey key = keygen.generateKey(); 
+            SecretKey key = keygen.generateKey();
             mykey = Base64.getEncoder().encodeToString(key.getEncoded());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: healthnet-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-healthnet_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-healthnetstorage}
+      MYSQL_USER: ${MYSQL_USER:-healthnet}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-healthnet_pass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - healthnet-mysql-data:/var/lib/mysql
+      # *.sql files here run automatically, in name order, on first start only.
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-healthnet_root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  healthnet-mysql-data:
