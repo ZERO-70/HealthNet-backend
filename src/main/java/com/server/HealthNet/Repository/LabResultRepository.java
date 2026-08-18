@@ -38,8 +38,15 @@ public class LabResultRepository {
     }
 
     public LabResult findById(Long resultId) {
+        if (resultId == null) {
+            return null;
+        }
+        // query(...) rather than queryForObject(...): a missing row is an ordinary
+        // "not found" that callers already null-check, whereas queryForObject throws
+        // EmptyResultDataAccessException, which surfaces to the client as an opaque
+        // error rather than a 404.
         String sql = "SELECT * FROM lab_results WHERE result_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToLabResult, resultId);
+        return jdbcTemplate.query(sql, this::mapRowToLabResult, resultId).stream().findFirst().orElse(null);
     }
 
     public Long save(LabResult labResult) {

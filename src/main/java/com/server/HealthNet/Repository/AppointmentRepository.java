@@ -40,8 +40,15 @@ public class AppointmentRepository {
 
     // Find an appointment by ID
     public Appointment findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        // query(...) rather than queryForObject(...): a missing row is an ordinary
+        // "not found" that callers already null-check, whereas queryForObject throws
+        // EmptyResultDataAccessException, which surfaces to the client as an opaque
+        // error rather than a 404.
         String sql = "SELECT * FROM appointments WHERE appointment_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToAppointment, id);
+        return jdbcTemplate.query(sql, this::mapRowToAppointment, id).stream().findFirst().orElse(null);
     }
 
     // Save a new appointment

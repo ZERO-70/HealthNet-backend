@@ -41,8 +41,15 @@ public class MedicalRecordAuditRepository {
     }
 
     public MedicalRecordAudit findById(Long auditId) {
+        if (auditId == null) {
+            return null;
+        }
+        // query(...) rather than queryForObject(...): a missing row is an ordinary
+        // "not found" that callers already null-check, whereas queryForObject throws
+        // EmptyResultDataAccessException, which surfaces to the client as an opaque
+        // error rather than a 404.
         String sql = "SELECT * FROM medical_record_audit WHERE audit_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToAudit, auditId);
+        return jdbcTemplate.query(sql, this::mapRowToAudit, auditId).stream().findFirst().orElse(null);
     }
 
     public Long save(MedicalRecordAudit audit) {

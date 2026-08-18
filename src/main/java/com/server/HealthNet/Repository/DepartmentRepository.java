@@ -27,8 +27,15 @@ public class DepartmentRepository {
     }
 
     public Department findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        // query(...) rather than queryForObject(...): a missing row is an ordinary
+        // "not found" that callers already null-check, whereas queryForObject throws
+        // EmptyResultDataAccessException, which surfaces to the client as an opaque
+        // error rather than a 404.
         String sql = "SELECT * FROM department WHERE department_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToDepartment, id);
+        return jdbcTemplate.query(sql, this::mapRowToDepartment, id).stream().findFirst().orElse(null);
     }
 
     public int save(Department department) {
