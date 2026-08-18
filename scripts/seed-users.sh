@@ -106,5 +106,49 @@ print(m[-1]['id'] if m else '')
   fi
 fi
 
+# Staff accounts need an admin token: /user_authentication/register refuses to
+# create a STAFF role unless the caller is already an ADMIN, and POST /staff is
+# ADMIN-only too. So this runs after the admin exists.
+if [ -n "${ADMIN_TOKEN:-}" ] && [ "$ADMIN_ONLY" = false ]; then
+  echo "Creating staff..."
+  STAFF1=$(curl -sS -X POST "${BASE}/staff" -H "Authorization: Bearer $ADMIN_TOKEN" \
+    -H 'Content-Type: application/json' \
+    -d '{"name":"Numan Riaz","gender":"Male","age":34,"birthdate":"1992-06-10","contact_info":"numan@healthnet.test","address":"3 Hospital Lane","profession":"Management"}' 2>/dev/null || true)
+
+  if [ -n "${STAFF1:-}" ] && [ "$STAFF1" -eq "$STAFF1" ] 2>/dev/null && [ "$STAFF1" -gt 0 ] 2>/dev/null; then
+    code=$(curl -sS -o /tmp/healthnet_reg.out -w '%{http_code}' \
+      -X POST "${BASE}/user_authentication/register" \
+      -H "Authorization: Bearer $ADMIN_TOKEN" -H 'Content-Type: application/json' \
+      -d "{\"username\":\"numan\",\"password\":\"numan123\",\"role\":\"STAFF\",\"personId\":${STAFF1},\"subscription\":\"DEFAULT\"}")
+    if [ "$code" = "201" ]; then
+      echo "  ✓ STAFF numan / numan123  (person_id=${STAFF1})"
+    else
+      echo "  ✗ numan -> HTTP $code: $(cat /tmp/healthnet_reg.out)"
+    fi
+  else
+    echo "  ! Skipped staff: could not create the staff person record."
+  fi
+fi
+
+# Treatments reference doctors, so they are created here rather than in
+# db/02_seed.sql — at schema-load time no doctors exist yet.
+#
+# This matters beyond demo data: medical_records.treatment_id is a foreign key,
+# so with an empty treatment table every attempt to save a medical record that
+# names a treatment fails on a constraint violation.
+if [ -n "${ADMIN_TOKEN:-}" ] && [ "$ADMIN_ONLY" = false ]; then
+  echo "Creating treatments..."
+  add_treatment() {
+    code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "${BASE}/treatement" \
+      -H "Authorization: Bearer $ADMIN_TOKEN" -H 'Content-Type: application/json' -d "$1")
+    [ "$code" = "200" ] || [ "$code" = "201" ] && echo "  ✓ $2" || echo "  ✗ $2 (HTTP $code)"
+  }
+  add_treatment "{\"name\":\"General Consultation\",\"doctor_id\":${DOC1},\"department_id\":7}" "General Consultation"
+  add_treatment "{\"name\":\"Cardiac Assessment\",\"doctor_id\":${DOC1},\"department_id\":1}" "Cardiac Assessment"
+  add_treatment "{\"name\":\"Neurological Evaluation\",\"doctor_id\":${DOC2},\"department_id\":2}" "Neurological Evaluation"
+  add_treatment "{\"name\":\"Physiotherapy Session\",\"doctor_id\":${DOC2},\"department_id\":3}" "Physiotherapy Session"
+  add_treatment "{\"name\":\"Emergency Triage\",\"doctor_id\":${DOC1},\"department_id\":5}" "Emergency Triage"
+fi
+
 echo
 echo "Done. Log in at ${BASE}/user_authentication/login"

@@ -37,6 +37,7 @@ requests.
 |---|---|---|
 | Admin | `admin` | `admin123` |
 | Doctor | `doctor1` | `doctor123` |
+| Staff | `numan` | `numan123` |
 | Patient | `patient1` | `patient123` |
 
 ---
