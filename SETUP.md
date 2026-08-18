@@ -46,11 +46,17 @@ committed anymore.
 With the backend running:
 
 ```bash
-./scripts/seed-users.sh
+./scripts/seed-users.sh              # all demo accounts
+./scripts/seed-users.sh --admin-only # just the admin
 ```
 
 Accounts go through `/user_authentication/register` rather than SQL because the
 app BCrypt-hashes passwords at registration time.
+
+The admin is registered with a **null `person_id`**. `POST /person` is itself
+ADMIN-only, and the only public person-creating endpoints are `/doctor` and
+`/patient` — using either would place the admin in the doctor or patient
+listings. The column is nullable, so the account works without one.
 
 | username   | password    | role    |
 |------------|-------------|---------|

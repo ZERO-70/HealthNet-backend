@@ -39,8 +39,14 @@ public class PersonRepository {
 
     // Find person by ID
     public Person findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        // query(...) rather than queryForObject(...): a missing row is a normal
+        // "not found", and callers already null-check. queryForObject throws
+        // EmptyResultDataAccessException instead, which surfaces as an opaque 500.
         String sql = "SELECT * FROM person WHERE person_id = ?";
-        return jdbcTemplate.queryForObject(sql, personRowMapper, id);
+        return jdbcTemplate.query(sql, personRowMapper, id).stream().findFirst().orElse(null);
     }
 
     // Save a new person

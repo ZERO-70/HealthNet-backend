@@ -5,13 +5,20 @@
 # passwords on registration, and a hash cannot be written by hand into the
 # schema without hardcoding a specific cost factor.
 #
-# Usage:  ./scripts/seed-users.sh [BASE_URL]
+# Usage:
+#   ./scripts/seed-users.sh [BASE_URL]              # doctors, patients and admin
+#   ./scripts/seed-users.sh --admin-only [BASE_URL] # just the admin account
+#
 # Default BASE_URL is http://localhost:8081
 set -euo pipefail
 
+ADMIN_ONLY=false
+if [ "${1:-}" = "--admin-only" ]; then
+  ADMIN_ONLY=true
+  shift
+fi
+
 BASE="${1:-http://localhost:8081}"
-# Allow "sudo docker" via DOCKER="sudo docker" if your user isn't in the docker group.
-DOCKER="${DOCKER:-docker}"
 
 echo "Seeding demo users into ${BASE}"
 
@@ -41,6 +48,7 @@ register() { # username password role personId
   fi
 }
 
+if [ "$ADMIN_ONLY" = false ]; then
 echo "Creating doctors..."
 DOC1=$(create_person_via doctor '{"name":"Dr. Ayesha Khan","gender":"Female","age":41,"birthdate":"1985-04-12","contact_info":"ayesha.khan@healthnet.test","address":"12 Clinic Road","specialization":"Cardiology"}')
 DOC2=$(create_person_via doctor '{"name":"Dr. Imran Ali","gender":"Male","age":37,"birthdate":"1989-09-03","contact_info":"imran.ali@healthnet.test","address":"8 Hospital Ave","specialization":"Neurology"}')
@@ -54,19 +62,48 @@ register doctor1 doctor123 DOCTOR  "$DOC1" DEFAULT
 register doctor2 doctor123 DOCTOR  "$DOC2" DEFAULT
 register patient1 patient123 PATIENT "$PAT1" PLUS
 register patient2 patient123 PATIENT "$PAT2" DEFAULT
+fi
 
-# The admin needs a bare person row, and there is no public endpoint for one,
-# so it goes in via SQL. Non-fatal: if docker isn't reachable the rest still stands.
+# Bootstrapping the admin takes three steps because POST /persons is itself
+# ADMIN-only (chicken-and-egg), and the only public person-creating endpoints are
+# /doctor and /patient — which would put the admin in those listings.
+#
+#   1. register with a null person_id (person_id is nullable)
+#   2. log in as that admin, and use its own rights to create a bare person
+#   3. link the person back to the account
+#
+# Step 3 matters: the frontend calls /persons/getmine for the profile, which
+# 404s while the account has no person attached.
 echo "Creating admin..."
-ADMIN_ID=$($DOCKER compose exec -T mysql mysql -N -B \
-  -u"${MYSQL_USER:-healthnet}" -p"${MYSQL_PASSWORD:-healthnet_pass}" "${MYSQL_DATABASE:-healthnetstorage}" \
-  -e "INSERT INTO person (name, gender, age, contact_info) VALUES ('System Admin','Other',30,'admin@healthnet.test'); SELECT LAST_INSERT_ID();" 2>/dev/null | tail -1 || true)
+register admin admin123 ADMIN null DEFAULT
 
-if [ -n "${ADMIN_ID:-}" ] && [ "$ADMIN_ID" -eq "$ADMIN_ID" ] 2>/dev/null; then
-  register admin admin123 ADMIN "$ADMIN_ID" DEFAULT
-else
-  echo "  ! Skipped admin: could not reach the DB via '$DOCKER compose exec'."
-  echo "    Re-run just this part with:  DOCKER=\"sudo docker\" $0 $BASE"
+ADMIN_TOKEN=$(curl -sS -X POST "${BASE}/user_authentication/login" \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"admin123"}' || true)
+
+if [ -n "$ADMIN_TOKEN" ]; then
+  curl -fsS -X POST "${BASE}/persons" -H "Authorization: Bearer $ADMIN_TOKEN" \
+    -H 'Content-Type: application/json' \
+    -d '{"name":"System Admin","gender":"Other","age":30,"birthdate":"1996-01-01","contact_info":"admin@healthnet.test","address":"HealthNet HQ"}' \
+    >/dev/null 2>&1 || true
+
+  ADMIN_PID=$(curl -fsS "${BASE}/persons" -H "Authorization: Bearer $ADMIN_TOKEN" 2>/dev/null | python3 -c "
+import sys, json
+try:
+    rows = json.load(sys.stdin)
+except Exception:
+    sys.exit()
+m = [r for r in rows if r.get('name') == 'System Admin' and r.get('id')]
+print(m[-1]['id'] if m else '')
+" 2>/dev/null || true)
+
+  if [ -n "${ADMIN_PID:-}" ]; then
+    # Note: this PUT re-hashes the password it is given, so the plaintext is correct here.
+    curl -fsS -X PUT "${BASE}/user_authentication/admin" -H "Authorization: Bearer $ADMIN_TOKEN" \
+      -H 'Content-Type: application/json' \
+      -d "{\"username\":\"admin\",\"password\":\"admin123\",\"role\":\"ADMIN\",\"personId\":${ADMIN_PID},\"subscription\":\"DEFAULT\"}" \
+      >/dev/null 2>&1 && echo "  ✓ linked admin to person_id=${ADMIN_PID}"
+  fi
 fi
 
 echo
