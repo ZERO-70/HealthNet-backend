@@ -27,6 +27,11 @@ COPY --from=build /build/target/HealthNet-0.0.1-SNAPSHOT.jar app.jar
 ENV PORT=8081
 EXPOSE 8081
 
+# Pure exec form, no shell wrapper: Heroku re-runs the ENTRYPOINT through its own
+# `sh -c`, which mangles a nested ["sh","-c","..."] into `java` with no arguments.
+# $PORT needs no expansion here — application.properties already resolves it via
+# server.port=${PORT:8081}, straight from the environment.
+#
 # MaxRAMPercentage keeps the heap inside the container limit. Free instances are
 # often 512 MB, where the JVM's default sizing would overcommit and get OOM-killed.
-ENTRYPOINT ["sh", "-c", "java -XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Dserver.port=${PORT} -jar app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:+UseSerialGC", "-jar", "app.jar"]
