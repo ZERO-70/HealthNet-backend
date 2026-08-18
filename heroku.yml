@@ -1,0 +1,11 @@
+# Deploys via the Dockerfile instead of the Java buildpack.
+#
+# The buildpack path would run `mvn clean install`, which executes
+# HealthNetApplicationTests (@SpringBootTest, needs a database) during the slug
+# build and fails. The Dockerfile already skips tests and honours $PORT, which
+# Heroku injects at runtime.
+#
+# Enable with:  heroku stack:set container -a <app-name>
+build:
+  docker:
+    web: Dockerfile
